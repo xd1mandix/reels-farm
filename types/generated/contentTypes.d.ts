@@ -454,9 +454,11 @@ export interface ApiAccountAccount extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    accessToken: Schema.Attribute.String & Schema.Attribute.Private;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    expiresAt: Schema.Attribute.DateTime & Schema.Attribute.Private;
     link: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -464,13 +466,11 @@ export interface ApiAccountAccount extends Struct.CollectionTypeSchema {
       'api::account.account'
     > &
       Schema.Attribute.Private;
-    login: Schema.Attribute.String & Schema.Attribute.Required;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    password: Schema.Attribute.String & Schema.Attribute.Required;
+    platform: Schema.Attribute.Enumeration<['youtube', 'instagram', 'tiktok']>;
     posts: Schema.Attribute.Relation<'oneToMany', 'api::post.post'>;
     publishedAt: Schema.Attribute.DateTime;
-    social: Schema.Attribute.Relation<'manyToOne', 'api::social.social'> &
-      Schema.Attribute.Required;
+    refreshToken: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -526,7 +526,7 @@ export interface ApiPostPost extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    description: Schema.Attribute.Text;
     link: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::post.post'> &
@@ -535,41 +535,14 @@ export interface ApiPostPost extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'scheduled'>;
     publishedAt: Schema.Attribute.DateTime;
     publishing: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'\u0412\u0438\u0434\u0435\u043E'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     video: Schema.Attribute.Media<'videos'>;
     video_orig: Schema.Attribute.Relation<'manyToOne', 'api::video.video'>;
-  };
-}
-
-export interface ApiSocialSocial extends Struct.CollectionTypeSchema {
-  collectionName: 'socials';
-  info: {
-    displayName: 'socials';
-    pluralName: 'socials';
-    singularName: 'social';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    accounts: Schema.Attribute.Relation<'oneToMany', 'api::account.account'>;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::social.social'
-    > &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.Enumeration<['youtube', 'tiktok', 'instagram']> &
-      Schema.Attribute.Required;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
   };
 }
 
@@ -589,10 +562,10 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::video.video'> &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
     partnership: Schema.Attribute.Relation<
       'manyToOne',
       'api::partnership.partnership'
@@ -609,6 +582,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
         number
       > &
       Schema.Attribute.DefaultTo<1>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1130,7 +1104,6 @@ declare module '@strapi/strapi' {
       'api::account.account': ApiAccountAccount;
       'api::partnership.partnership': ApiPartnershipPartnership;
       'api::post.post': ApiPostPost;
-      'api::social.social': ApiSocialSocial;
       'api::video.video': ApiVideoVideo;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

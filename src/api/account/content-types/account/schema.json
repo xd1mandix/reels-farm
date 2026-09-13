@@ -19,20 +19,30 @@
       "type": "string",
       "required": true
     },
-    "login": {
+    "accessToken": {
       "type": "string",
-      "required": true
+      "private": true,
+      "searchable": false,
+      "required": false
     },
-    "password": {
+    "refreshToken": {
       "type": "string",
-      "required": true
+      "private": true,
+      "searchable": false,
+      "required": false
     },
-    "social": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::social.social",
-      "required": true,
-      "inversedBy": "accounts"
+    "platform": {
+      "type": "enumeration",
+      "enum": [
+        "youtube",
+        "instagram",
+        "tiktok"
+      ]
+    },
+    "expiresAt": {
+      "type": "datetime",
+      "private": true,
+      "required": false
     },
     "posts": {
       "type": "relation",

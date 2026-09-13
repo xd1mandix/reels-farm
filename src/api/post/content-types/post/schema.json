@@ -11,13 +11,18 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "link": {
+    "title": {
       "type": "string",
-      "required": false
+      "default": "Видео",
+      "required": true
     },
     "description": {
       "type": "text",
-      "required": true
+      "required": false
+    },
+    "link": {
+      "type": "string",
+      "required": false
     },
     "publishing": {
       "type": "datetime"

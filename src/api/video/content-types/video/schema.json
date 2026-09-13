@@ -11,9 +11,12 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "name": {
+    "title": {
       "type": "string",
       "required": true
+    },
+    "description": {
+      "type": "text"
     },
     "video": {
       "type": "media",

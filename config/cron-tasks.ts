@@ -1,5 +1,7 @@
 import fs from 'fs';
 import { getPublicPath } from '../src/services/ffmpeg';
+import { publishToYoutube } from '../src/api/youtube/services/youtube';
+
 export default {
     publishPosts: {
       task: async ({ strapi }) => {
@@ -30,17 +32,10 @@ export default {
         for (const post of posts) {
           try {
             // твоя логика публикации
-            await publishToTelegram(post);
-  
-            await strapi.documents("api::post.post").update({
-              documentId: post.documentId,
-              data: {
-                publish_status: "published",
-              },
-            });
+            await publish(strapi, post);
   
             strapi.log.info(`Published post ${post.documentId}`);
-            // await fs.unlink(getPublicPath(post.video_orig.url), () => {})
+            await fs.unlink(getPublicPath(post.video_orig.url), () => {})
           } catch (err) {
             strapi.log.error(`Failed to publish ${post.documentId}`);
             strapi.log.error(err);
@@ -49,11 +44,16 @@ export default {
       },
   
       options: {
-        rule: "*/5 * * * *", // каждую минуту
+        // rule: "*/5 * * * *", // каждые 5 минут
+        rule: "* * * * *",
       },
     },
   };
   
-  async function publishToTelegram(post: any) {
-    // Telethon / Telegram API
+  async function publish(strapi: any, post: any) {
+      switch(post.account.platform) {
+        case "youtube":
+          await publishToYoutube(strapi, post)
+          break;
+      }
   }

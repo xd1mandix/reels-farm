@@ -35,8 +35,11 @@ export async function processVideo(documentId: string) {
  
   const partDuration = duration / video.parts;
   
-  const imgPath = getPublicPath(video.partnership.content?.url) 
-
+  let imgPath = null
+  if(video.partnership?.content) {
+    imgPath = getPublicPath(video.partnership?.content?.url) 
+  }
+  
   for (let i = 0; i < video.parts; i++) {
 
     const start = i * partDuration;
@@ -58,7 +61,8 @@ export async function processVideo(documentId: string) {
       console.log(media)
       await strapi.documents("api::post.post").create({
         data: {
-          description: `${video.name} part ${i + 1}`,
+          title: `${video.title} part ${i + 1}`,
+          description: `${video.description}\n${video.partnership.post_content}`,
           video_orig: video.documentId,
           publishing: new Date(),
           video: media,

@@ -55,11 +55,13 @@ export async function processVideo(documentId: string) {
     try {
       const media = await uploadToStrapi(output);
 
+      console.log(media)
       await strapi.documents("api::post.post").create({
         data: {
           description: `${video.name} part ${i + 1}`,
-          video: video.documentId,
+          video_orig: video.documentId,
           publishing: new Date(),
+          video: media,
           account: {
             documentId: video.account.documentId
           }
@@ -72,7 +74,7 @@ export async function processVideo(documentId: string) {
   }
 }
 
-function getPublicPath(relativePath) {
+export function getPublicPath(relativePath) {
   return path.join(
     process.cwd(),
     "public",
@@ -82,6 +84,8 @@ function getPublicPath(relativePath) {
 
 export function getDuration(filePath: string): Promise<number> {
     return new Promise((resolve, reject) => {
+      console.log(filePath, 'getDuration')
+
       ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) return reject(err);
   
@@ -92,6 +96,7 @@ export function getDuration(filePath: string): Promise<number> {
 
 export function renderPart(options) {
     return new Promise((resolve, reject) => {
+      console.log(options, 'opts')
   
       const command = ffmpeg(options.input)
         .setStartTime(options.start)
@@ -104,15 +109,71 @@ export function renderPart(options) {
       if (options.overlay) {
         command.input(options.overlay);
       }
-  
+
+      const filters: string[] = [];
+
+      if (!options.overlay) {
+        // ===== Макет №1 =====
+    
+        filters.push(
+          // Черный холст 1080x1920
+          "color=c=black:s=1080x1920:d=1[bg]",
+    
+          // Основное видео (80% высоты)
+          "[0:v]scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]",
+          
+          // Верхняя картинка
+          "[1:v]scale=w='max(1080,iw)':h=-2[img]",
+    
+          // Композиция
+          // Сначала кладем видео
+          "[bg][main]overlay=0:192[tmp]",
+
+          // Затем картинку поверх него (по центру)
+          "[tmp][img]overlay=(W-w)/2:40[out]"
+        );
+      } else {
+          // ===== Макет №2 =====
+    
+          filters.push(
+          "color=c=black:s=1080x1920:d=1[bg]",
+    
+          // Верхнее видео 60%
+          "[0:v]scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[top]",
+          // Нижнее видео 40%
+          "[2:v]scale=1080:768:force_original_aspect_ratio=increase,crop=1080:768[bottom]",
+          // Картинка 20% ширины
+          "[1:v]scale=216:-2[img]",
+
+           // Сборка
+          "[bg][top]overlay=0:0[tmp1]",
+          "[tmp1][bottom]overlay=0:1152[tmp2]",
+
+          // Последний слой — изображение
+          "[tmp2][img]overlay=20:480[out]"
+        );
+      }
+    
       command
-        .complexFilter([
-          "overlay=20:20"
-        ])
-        .output(options.output)
-        .on("end", resolve)
-        .on("error", reject)
-        .run();
+          .complexFilter(filters, "out")
+          .videoCodec("libx264")
+          .audioCodec("aac")
+          .outputOptions([
+            "-map 0:a?",          // только аудио
+            "-pix_fmt yuv420p",
+            "-preset medium",
+            "-b:v 28M",
+            "-maxrate 30M",
+            "-bufsize 56M",
+            "-b:a 192k",
+            "-movflags +faststart",
+          ])
+          .output(options.output)
+          .on("end", resolve)
+          .on("stderr", line => console.log(line))
+          .on("error", err => console.error(err))
+          .on("error", reject)
+          .run();
     });
   }
 

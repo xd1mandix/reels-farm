@@ -27,6 +27,13 @@
       "type": "integer",
       "required": true
     },
+    "speed": {
+      "type": "decimal",
+      "required": false,
+      "default": 1,
+      "min": 0.1,
+      "max": 2
+    },
     "account": {
       "type": "relation",
       "relation": "manyToOne",
@@ -38,7 +45,7 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::post.post",
-      "mappedBy": "video"
+      "mappedBy": "video_orig"
     },
     "partnership": {
       "type": "relation",

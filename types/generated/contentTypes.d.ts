@@ -538,7 +538,8 @@ export interface ApiPostPost extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    video: Schema.Attribute.Relation<'manyToOne', 'api::video.video'>;
+    video: Schema.Attribute.Media<'videos'>;
+    video_orig: Schema.Attribute.Relation<'manyToOne', 'api::video.video'>;
   };
 }
 
@@ -599,6 +600,15 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     parts: Schema.Attribute.Integer & Schema.Attribute.Required;
     posts: Schema.Attribute.Relation<'oneToMany', 'api::post.post'>;
     publishedAt: Schema.Attribute.DateTime;
+    speed: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 2;
+          min: 0.1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

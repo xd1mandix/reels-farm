@@ -1,3 +1,5 @@
+import fs from 'fs';
+import { getPublicPath } from '../src/services/ffmpeg';
 export default {
     publishPosts: {
       task: async ({ strapi }) => {
@@ -8,6 +10,17 @@ export default {
             publish_status: "scheduled",
             publishing: {
               $lte: now,
+            },
+          },
+          populate: {
+            video: {
+              populate: '*'
+            },
+            video_orig: {
+              populate: '*'
+            },
+            account: {
+              populate: '*'
             },
           },
         });
@@ -27,6 +40,7 @@ export default {
             });
   
             strapi.log.info(`Published post ${post.documentId}`);
+            // await fs.unlink(getPublicPath(post.video_orig.url), () => {})
           } catch (err) {
             strapi.log.error(`Failed to publish ${post.documentId}`);
             strapi.log.error(err);
@@ -35,7 +49,7 @@ export default {
       },
   
       options: {
-        rule: "* * * * *", // каждую минуту
+        rule: "*/5 * * * *", // каждую минуту
       },
     },
   };

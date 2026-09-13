@@ -13,9 +13,11 @@
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
-    "worker": "tsx src/workerBootstrap.ts"
+    "worker": "tsx src/workerBootstrap.ts",
+    "start:worker": "docker compose up -d && yarn worker"
   },
   "dependencies": {
+    "@frkntmbs/strapi-plugin-video-optimizer": "^1.0.4",
     "@strapi/plugin-cloud": "5.53.0",
     "@strapi/plugin-documentation": "5.53.0",
     "@strapi/plugin-users-permissions": "5.53.0",

@@ -459,6 +459,7 @@ export interface ApiAccountAccount extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     expiresAt: Schema.Attribute.DateTime & Schema.Attribute.Private;
+    externalId: Schema.Attribute.String;
     link: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<

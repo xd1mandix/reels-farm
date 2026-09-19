@@ -8,7 +8,7 @@ export async function publishToYoutube(
   strapi: Core.Strapi,
   post: any,
 ) {
-  if(!post || !post?.account) return { error: null }
+  if (!post || !post?.account) return { error: null }
 
   const oauth = createOAuthClient()
 
@@ -34,6 +34,7 @@ export async function publishToYoutube(
       status: {
         privacyStatus: "private",
         publishAt: new Date(post.publishing).toISOString(),
+        selfDeclaredMadeForKids: false,
       },
     },
     media: {

@@ -19,6 +19,9 @@
       "type": "string",
       "required": true
     },
+    "externalId": {
+      "type": "string"
+    },
     "accessToken": {
       "type": "string",
       "private": true,

@@ -6,56 +6,31 @@ export default {
       light: {
         colors: {
           buttonPrimary500: '#BDE6A2',
-          buttonPrimary600: '#8ACA70',
-          primary100: '#F3FFF0',
+          buttonPrimary600: '#73BE57',
+
+          primary100: '#E5F5E1',
           primary200: '#E1FFD8',
           primary500: '#81D667',
-          primary600: '#56C734',
-          primary700: '#39CC1C',
+          primary600: '#5D9E45',
+          primary700: '#6EAD60',
           secondary100: '#F4FFEA',
           secondary200: '#CFFFB8',
           secondary500: '#6CCE58',
           secondary600: '#48AF0C',
           secondary700: '#2F9600',
 
-          neutral0: '#FFF5EC',
-          neutral100: '#EEE8E2',
+          neutral0: '#FFFFFF',
+          neutral100: '#ECEAE7',
           neutral1000: '#182618',
-          neutral150: '#EFEDEA',
-          neutral200: '#E4E0DC',
-          neutral300: '#CFCAC0',
-          neutral400: '#BAB1A5',
-          neutral500: '#A99A8E',
-          neutral600: '#877966',
+          neutral150: '#D3D1CE',
+          neutral200: '#F0ECE8',
+          neutral300: '#DBD6CA',
+          neutral400: '#D6CEC4',
+          neutral500: '#CABBAF',
+          neutral600: '#978A79',
           neutral700: '#6A584A',
           neutral800: '#4D4032',
           neutral900: '#342C21',
-
-
-          alternative100: '#f6ecfc',
-          alternative200: '#e0c1f4',
-          alternative500: '#ac73e6',
-          alternative600: '#9736e8',
-          alternative700: '#8312d1',
-          buttonNeutral0: '#ffffff',
-          danger100: '#fcecea',
-          danger200: '#f5c0b8',
-          danger500: '#ee5e52',
-          danger600: '#d02b20',
-          danger700: '#b72b1a',
-
-
-
-          success100: '#eafbe7',
-          success200: '#c6f0c2',
-          success500: '#5cb176',
-          success600: '#328048',
-          success700: '#2f6846',
-          warning100: '#fdf4dc',
-          warning200: '#fae7b9',
-          warning500: '#f29d41',
-          warning600: '#d9822f',
-          warning700: '#be5d01',
         },
       },
       dark: {
@@ -94,5 +69,6 @@ export default {
     ],
   },
   bootstrap(app: StrapiApp) {
+    console.log(app);
   },
 };

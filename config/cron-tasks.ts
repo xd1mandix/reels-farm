@@ -28,18 +28,18 @@ export default {
         },
       });
 
-      console.log(now, posts)
+      console.log(now, posts, "[scheduled]")
 
       for (const post of posts) {
         try {
           // твоя логика публикации
           await publish(strapi, post);
 
-          strapi.log.info(`Published post ${post.documentId}`);
-          await fs.unlink(getPublicPath(post.video_orig.url), () => { })
+          console.log(post, '[published]');
+          await fs.unlink(getPublicPath(post.video.url), () => { })
         } catch (err) {
-          strapi.log.error(`Failed to publish ${post.documentId}`);
-          strapi.log.error(err);
+          console.error(post, '[error]');
+          console.error(err);
         }
       }
     },
@@ -54,10 +54,10 @@ export default {
 async function publish(strapi: any, post: any) {
   switch (post.account.platform) {
     case "youtube":
-      await publishToYoutube(strapi, post)
+      // await publishToYoutube(strapi, post)
       break;
     case "instagram":
-      await publishToInstagram(strapi, post)
+      // await publishToInstagram(strapi, post)
       break;
   }
 }

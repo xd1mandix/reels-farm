@@ -34,7 +34,7 @@ export const startVideoWorker = async () => {
   });
 
   return worker
-}; 
+};
 
 export const stopVideoWorker = async () => {
   if (!worker) return;
@@ -43,8 +43,8 @@ export const stopVideoWorker = async () => {
   worker = null;
 };
 
-export async function getStrapi(): Promise<Core.Strapi> { 
-  if(app) return app
+export async function getStrapi(): Promise<Core.Strapi> {
+  if (app) return app
 
   const appContext = await compileStrapi();
   app = await createStrapi(appContext);

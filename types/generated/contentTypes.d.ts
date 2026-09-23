@@ -577,7 +577,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     speed: Schema.Attribute.Decimal &
       Schema.Attribute.SetMinMax<
         {
-          max: 2;
+          max: 5;
           min: 0.1;
         },
         number

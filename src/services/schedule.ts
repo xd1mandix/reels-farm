@@ -17,6 +17,7 @@ export async function getPublishingDates(
             publishing: {
                 $notNull: true,
             },
+            publish_status: 'scheduled'
         },
         sort: ["publishing:desc"],
         fields: ["publishing"],

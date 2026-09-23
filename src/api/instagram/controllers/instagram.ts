@@ -28,7 +28,8 @@ export default {
 
     const token = await tokenRes.json();
 
-    console.log(token, 'token')
+    console.log('[got token][insta]')
+
     const res = await fetch(
       "https://graph.instagram.com/access_token?" +
       new URLSearchParams({
@@ -40,7 +41,7 @@ export default {
 
     const longToken = await res.json();
 
-    console.log(longToken, 'long')
+    console.log('[got long token][insta]')
 
     const me = await fetch(
       "https://graph.instagram.com/v23.0/me?" +
@@ -51,7 +52,8 @@ export default {
     );
 
     const profile = await me.json();
-    console.log(profile, 'profile')
+
+    console.log(profile.username, '[logined][insta]')
 
     await strapi.documents("api::account.account").create({
       data: {

@@ -17,27 +17,29 @@ export default ({ env }) => {
         maxFfmpegThreads: 2,
       },
     },
-    // "strapi-custom-action-perform-page": {
-    //   enabled: true,
-    //   config: {
-    //     title: 'Authorize',
-    //     downloadButtons: [
-    //       {
-    //         label: "Youtube",
-    //         endpoints: {
-    //           localhost: "http://localhost:1337/api/youtube/connect",
-    //           production: `${env('PUBLIC_URL')}/api/youtube/connect`,
-    //         },
-    //       },
-    //       {
-    //         label: "Instagram",
-    //         endpoints: {
-    //           localhost: "http://localhost:1337/api/instagram/connect",
-    //           production: `${env('PUBLIC_URL')}/api/instagram/connect`,
-    //         },
-    //       },
-    //     ],
-    //   },
-    // },
+    "strapi-custom-action-perform-page": {
+      enabled: true,
+      config: {
+        title: 'Подключение аккаунтов',
+        downloadButtons: [
+          {
+            label: "Youtube",
+            buttonText: "Авторизоваться",
+            endpoints: {
+              localhost: "http://localhost:1337/api/youtube/connect",
+              production: `${env('PUBLIC_URL')}/api/youtube/connect`,
+            },
+          },
+          {
+            label: "Instagram",
+            buttonText: "Авторизоваться",
+            endpoints: {
+              localhost: "http://localhost:1337/api/instagram/connect",
+              production: `${env('PUBLIC_URL')}/api/instagram/connect`,
+            },
+          },
+        ],
+      },
+    },
   }
 }

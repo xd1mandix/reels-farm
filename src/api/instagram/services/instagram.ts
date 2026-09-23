@@ -13,7 +13,7 @@ export const getInstAuthUrl = () => {
     force_authentication: "1",
   });
 
-  console.log(params, 'getAuth')
+  console.log('[auth started][insta]')
 
   return `https://api.instagram.com/oauth/authorize?${params}`;
 };
@@ -43,6 +43,7 @@ export async function publishToInstagram(
   if (shouldRefreshToken(account)) {
     token = await refreshInstagramToken(account);
     account.accessToken = token
+    console.log('[token refreshed][insta]')
   }
 
   const container = await createContainer(
@@ -51,7 +52,12 @@ export async function publishToInstagram(
     videoUrl
   );
 
+  console.log(container.id, '[container created][insta]')
+
+
   await waitUntilFinished(account, container.id);
+
+  console.log(container.id, '[container processed][insta]')
 
   const reel = await publishContainer(
     account,
@@ -68,7 +74,7 @@ export async function publishToInstagram(
 
   const media = await res.json();
 
-  console.log(media);
+  console.log(media.permalink, "[video uploaded][insta]");
 
   await strapi.documents("api::post.post").update({
     documentId: post.documentId,
@@ -82,8 +88,6 @@ export async function publishToInstagram(
 }
 
 async function createContainer(account, post, videoUrl: string) {
-  console.log(videoUrl, "createContainer")
-
 
   const res = await fetch(
     `https://graph.instagram.com/v23.0/${account.externalId}/media`,
@@ -115,7 +119,7 @@ async function waitUntilFinished(account, containerId: string) {
     );
 
     const json = await res.json();
-    console.log(json, 'waitUntilFinished')
+
     if (json.status_code === "FINISHED") return;
 
     if (json.status_code === "ERROR") {
@@ -160,7 +164,7 @@ async function refreshInstagramToken(account) {
     data: {
       accessToken: json.access_token,
       expiresAt: new Date(
-        Date.now() + json.expires_in * 1000
+        Date.now() + new Date(json.expires_in).getTime() * 1000
       ),
     },
   });
@@ -171,5 +175,5 @@ async function refreshInstagramToken(account) {
 function shouldRefreshToken(account) {
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
-  return account.expiresAt.getTime() - Date.now() < sevenDays;
+  return new Date(account.expiresAt).getTime() - Date.now() < sevenDays;
 }

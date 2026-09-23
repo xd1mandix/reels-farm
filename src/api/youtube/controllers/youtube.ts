@@ -19,33 +19,29 @@ export default {
       ],
     });
 
-    console.log(url)
+    console.log("[auth started][youtube]")
 
     ctx.redirect(url);
   },
 
   async callback(ctx) {
     const code = Array.isArray(ctx.query.code)
-    ? ctx.query.code[0]
-    : ctx.query.code
-
-    console.log(ctx.query)
+      ? ctx.query.code[0]
+      : ctx.query.code
 
     if (!code) {
       return ctx.badRequest("No authorization code");
     }
 
     const oauth = createOAuthClient()
-  
+
     const tokensRes = await oauth.getToken(code);
-  
+
     const tokens = tokensRes.tokens
-    console.log(tokensRes)
+    console.log("[got token][youtube]")
 
     oauth.setCredentials(tokens)
 
-    // tokens.access_token
-    // tokens.refresh_token
     const youtube = google.youtube({
       version: "v3",
       auth: oauth,
@@ -58,6 +54,8 @@ export default {
 
     const channel = me.data.items?.[0];
 
+    console.log("[authentificated][youtube]")
+
     await strapi.documents("api::account.account").create({
       data: {
         platform: 'youtube',
@@ -68,7 +66,7 @@ export default {
         expiresAt: new Date(tokens.expiry_date),
       },
     });
-  
+
     ctx.body = "YouTube connected";
   }
 };

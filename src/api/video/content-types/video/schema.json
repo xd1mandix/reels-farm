@@ -55,6 +55,16 @@
       "relation": "manyToOne",
       "target": "api::partnership.partnership",
       "inversedBy": "videos"
+    },
+    "start": {
+      "type": "component",
+      "component": "shared.timecode",
+      "repeatable": false
+    },
+    "end": {
+      "type": "component",
+      "component": "shared.timecode",
+      "repeatable": false
     }
   }
 }

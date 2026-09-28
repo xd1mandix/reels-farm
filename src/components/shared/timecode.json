@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_shared_timecodes",
+  "info": {
+    "displayName": "timecode"
+  },
+  "options": {},
+  "attributes": {
+    "MM": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 120
+    },
+    "SS": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 59
+    }
+  },
+  "config": {}
+}

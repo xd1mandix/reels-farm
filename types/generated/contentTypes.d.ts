@@ -564,6 +564,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    end: Schema.Attribute.Component<'shared.timecode', false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::video.video'> &
       Schema.Attribute.Private;
@@ -583,6 +584,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
         number
       > &
       Schema.Attribute.DefaultTo<1>;
+    start: Schema.Attribute.Component<'shared.timecode', false>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

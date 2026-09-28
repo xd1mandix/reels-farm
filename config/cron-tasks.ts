@@ -45,8 +45,8 @@ export default {
     },
 
     options: {
-      // rule: "*/5 * * * *", // каждые 5 минут
-      rule: "* * * * *",
+      rule: "*/5 * * * *", // каждые 5 минут
+      // rule: "* * * * *",
     },
   },
 };
@@ -54,10 +54,10 @@ export default {
 async function publish(strapi: any, post: any) {
   switch (post.account.platform) {
     case "youtube":
-      // await publishToYoutube(strapi, post)
+      await publishToYoutube(strapi, post)
       break;
     case "instagram":
-      // await publishToInstagram(strapi, post)
+      await publishToInstagram(strapi, post)
       break;
   }
 }

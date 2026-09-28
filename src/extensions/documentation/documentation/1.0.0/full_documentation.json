@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2026-09-23T05:18:46.259Z"
+    "x-generation-date": "2026-09-26T07:54:19.203Z"
   },
   "x-strapi-config": {
     "plugins": [
@@ -24,7 +24,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:1337/api",
+      "url": "https://jargon-proofs-stoic.ngrok-free.dev/api",
       "description": "Development server"
     }
   ],
@@ -5479,6 +5479,12 @@
                               }
                             }
                           },
+                          "start": {
+                            "$ref": "#/components/schemas/SharedTimecodeComponent"
+                          },
+                          "end": {
+                            "$ref": "#/components/schemas/SharedTimecodeComponent"
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time"
@@ -5824,6 +5830,27 @@
           },
           "meta": {
             "type": "object"
+          }
+        }
+      },
+      "SharedTimecodeComponent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "MM": {
+            "type": "integer"
+          },
+          "SS": {
+            "type": "integer"
           }
         }
       },
@@ -8053,6 +8080,12 @@
                       }
                     }
                   }
+                },
+                "start": {
+                  "$ref": "#/components/schemas/SharedTimecodeComponent"
+                },
+                "end": {
+                  "$ref": "#/components/schemas/SharedTimecodeComponent"
                 },
                 "createdAt": {
                   "type": "string",
@@ -10295,6 +10328,12 @@
                             }
                           }
                         },
+                        "start": {
+                          "$ref": "#/components/schemas/SharedTimecodeComponent"
+                        },
+                        "end": {
+                          "$ref": "#/components/schemas/SharedTimecodeComponent"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -10716,6 +10755,12 @@
                   }
                 ],
                 "example": "string or id"
+              },
+              "start": {
+                "$ref": "#/components/schemas/SharedTimecodeComponent"
+              },
+              "end": {
+                "$ref": "#/components/schemas/SharedTimecodeComponent"
               },
               "locale": {
                 "type": "string"
@@ -12729,6 +12774,12 @@
                             }
                           }
                         },
+                        "start": {
+                          "$ref": "#/components/schemas/SharedTimecodeComponent"
+                        },
+                        "end": {
+                          "$ref": "#/components/schemas/SharedTimecodeComponent"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -13011,6 +13062,12 @@
                 "type": "string"
               }
             }
+          },
+          "start": {
+            "$ref": "#/components/schemas/SharedTimecodeComponent"
+          },
+          "end": {
+            "$ref": "#/components/schemas/SharedTimecodeComponent"
           },
           "createdAt": {
             "type": "string",

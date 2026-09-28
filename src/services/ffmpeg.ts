@@ -26,6 +26,12 @@ export async function processVideo(documentId: string) {
       partnership: {
         populate: '*'
       },
+      start: {
+        populate: '*'
+      },
+      end: {
+        populate: '*'
+      },
     },
   });
 
@@ -33,10 +39,11 @@ export async function processVideo(documentId: string) {
   const videoPath = getPublicPath(video.video.url)
 
   let workingVideo = videoPath;
+  const speed = video.speed || 1;
 
   console.log(workingVideo, '[read]')
   // If Speed is != 1 - change speed in tmp file
-  if (video.speed && video.speed !== 1) {
+  if (speed !== 1) {
     const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`)
 
     await changeSpeed(videoPath, speedPath, video.speed);
@@ -45,8 +52,22 @@ export async function processVideo(documentId: string) {
     console.log(workingVideo, '[sped up]')
   }
 
-  const duration = await getDuration(workingVideo);
+  const fullDuration = await getDuration(workingVideo);
 
+  // 3. timecodes (seconds)
+  let startTime = parseTimestamp(video.start);
+  let endTime = video.end
+    ? parseTimestamp(video.end)
+    : fullDuration * speed; // если конец не указан
+
+  // correct after speed up  
+  startTime /= speed;
+  endTime /= speed;
+
+  endTime = Math.min(fullDuration, endTime);
+  startTime = Math.min(endTime, startTime);
+
+  const duration = endTime - startTime;
   const partDuration = duration / video.parts;
 
   let imgPath = null
@@ -66,7 +87,7 @@ export async function processVideo(documentId: string) {
   // split video
   for (let i = 0; i < video.parts; i++) {
 
-    const start = i * partDuration;
+    const start = startTime + i * partDuration;
 
     const output = getPublicPath(`/temp/${documentId}_${i}.mp4`);
 
@@ -106,8 +127,9 @@ export async function processVideo(documentId: string) {
     }
   }
 
+  await fs.unlink(workingVideo, () => { })
   if (workingVideo !== videoPath) {
-    await fs.unlink(workingVideo, () => { })
+    await fs.unlink(videoPath, () => { })
   }
 }
 
@@ -117,6 +139,12 @@ export function getPublicPath(relativePath) {
     "public",
     relativePath
   );
+}
+
+function parseTimestamp(time?: { MM?: number, SS?: number }): number {
+  if (!time) return 0;
+
+  return time.MM * 60 + time.SS;
 }
 
 export function getDuration(filePath: string): Promise<number> {

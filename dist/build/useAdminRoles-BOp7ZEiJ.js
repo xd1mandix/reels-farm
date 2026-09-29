@@ -1,0 +1,1 @@
+import{a3 as u,cd as d,ce as p,q as f}from"./strapi-DYgy_QPR.js";const E=(o={},r)=>{const{locale:t}=u(),e=d(t,{sensitivity:"base"}),{data:s,error:a,isError:n,isLoading:c,refetch:i}=p(o,r);return{roles:f.useMemo(()=>[...s??[]].sort((m,l)=>e.compare(m.name,l.name)),[s,e]),error:a,isError:n,isLoading:c,refetch:i}};export{E as u};

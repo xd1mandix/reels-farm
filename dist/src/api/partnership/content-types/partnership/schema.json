@@ -1,0 +1,41 @@
+{
+    "kind": "collectionType",
+    "collectionName": "partnerships",
+    "info": {
+        "singularName": "partnership",
+        "pluralName": "partnerships",
+        "displayName": "partnerships"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "content": {
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": [
+                "images",
+                "videos"
+            ]
+        },
+        "post_content": {
+            "type": "text",
+            "required": true
+        },
+        "link": {
+            "type": "string"
+        },
+        "videos": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::video.video",
+            "mappedBy": "partnership"
+        }
+    }
+}

@@ -1,0 +1,70 @@
+{
+    "kind": "collectionType",
+    "collectionName": "videos",
+    "info": {
+        "singularName": "video",
+        "pluralName": "videos",
+        "displayName": "video"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "video": {
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": [
+                "videos"
+            ]
+        },
+        "parts": {
+            "type": "integer",
+            "required": true
+        },
+        "speed": {
+            "type": "decimal",
+            "required": false,
+            "default": 1,
+            "min": 0.1,
+            "max": 5
+        },
+        "account": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::account.account",
+            "required": true,
+            "inversedBy": "videos"
+        },
+        "posts": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::post.post",
+            "mappedBy": "video_orig"
+        },
+        "partnership": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::partnership.partnership",
+            "inversedBy": "videos"
+        },
+        "start": {
+            "type": "component",
+            "component": "shared.timecode",
+            "repeatable": false
+        },
+        "end": {
+            "type": "component",
+            "component": "shared.timecode",
+            "repeatable": false
+        }
+    }
+}

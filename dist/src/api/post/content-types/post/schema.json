@@ -1,0 +1,59 @@
+{
+    "kind": "collectionType",
+    "collectionName": "posts",
+    "info": {
+        "singularName": "post",
+        "pluralName": "posts",
+        "displayName": "posts"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "default": "Видео",
+            "required": true
+        },
+        "description": {
+            "type": "text",
+            "required": false
+        },
+        "link": {
+            "type": "string",
+            "required": false
+        },
+        "publishing": {
+            "type": "datetime"
+        },
+        "video": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "videos"
+            ]
+        },
+        "publish_status": {
+            "type": "enumeration",
+            "required": false,
+            "default": "scheduled",
+            "enum": [
+                "scheduled",
+                "published"
+            ]
+        },
+        "account": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::account.account",
+            "inversedBy": "posts"
+        },
+        "video_orig": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::video.video",
+            "inversedBy": "posts"
+        }
+    }
+}

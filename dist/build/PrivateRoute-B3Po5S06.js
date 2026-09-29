@@ -1,0 +1,1 @@
+import{bl as s,bI as r,B as u,bJ as i}from"./strapi-DYgy_QPR.js";const h=({children:t})=>{const o=s("PrivateRoute",n=>n.token),{pathname:e,search:a}=r();return o!==null?t:u.jsx(i,{to:{pathname:"/auth/login",search:e!=="/"?`?redirectTo=${encodeURIComponent(`${e}${a}`)}`:void 0}})};export{h as P};

@@ -1,0 +1,63 @@
+{
+    "kind": "collectionType",
+    "collectionName": "accounts",
+    "info": {
+        "singularName": "account",
+        "pluralName": "accounts",
+        "displayName": "accounts"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "link": {
+            "type": "string",
+            "required": true
+        },
+        "externalId": {
+            "type": "string"
+        },
+        "accessToken": {
+            "type": "string",
+            "private": true,
+            "searchable": false,
+            "required": false
+        },
+        "refreshToken": {
+            "type": "string",
+            "private": true,
+            "searchable": false,
+            "required": false
+        },
+        "platform": {
+            "type": "enumeration",
+            "enum": [
+                "youtube",
+                "instagram",
+                "tiktok"
+            ]
+        },
+        "expiresAt": {
+            "type": "datetime",
+            "private": true,
+            "required": false
+        },
+        "posts": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::post.post",
+            "mappedBy": "account"
+        },
+        "videos": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::video.video",
+            "mappedBy": "account"
+        }
+    }
+}

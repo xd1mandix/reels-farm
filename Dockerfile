@@ -23,10 +23,10 @@ COPY --from=builder /app ./
 
 ENV NODE_ENV=production
 
-RUN addgroup -S strapi && adduser -S strapi -G strapi
-RUN chown -R strapi:strapi /app
+RUN addgroup -S reelsfarm && adduser -S reelsfarm -G reelsfarm
+RUN chown -R reelsfarm:reelsfarm /app
 
-USER strapi
+USER reelsfarm
 
 EXPOSE 1337
 

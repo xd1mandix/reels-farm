@@ -8,10 +8,12 @@ COPY package*.json ./
 RUN npm ci
 
 COPY .strapi ./
+RUN ls .
+
 COPY dist ./
 COPY public ./
 
-RUN ls .
+
 
 ENV NODE_ENV=production
 

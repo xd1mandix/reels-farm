@@ -4,9 +4,6 @@ RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/.strapi ./.strapi
-
 ENV NODE_ENV=production
 
 RUN addgroup -S reelsfarm && adduser -S reelsfarm -G reelsfarm

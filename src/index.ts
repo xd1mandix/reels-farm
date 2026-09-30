@@ -8,7 +8,7 @@ export default {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register(/* { strapi }: { strapi: Core.Strapi } */) { },
 
   /**
    * An asynchronous bootstrap function that runs before
@@ -18,7 +18,11 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
-    // await stopVideoWorker()
-    // startVideoWorker();
+    await stopVideoWorker()
+    startVideoWorker(strapi);
   },
+
+  async destroy({ strapi }: { strapi: Core.Strapi }) {
+    await stopVideoWorker()
+  }
 };

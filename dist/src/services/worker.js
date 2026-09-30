@@ -8,10 +8,12 @@ const ffmpeg_1 = require("./ffmpeg");
 const strapi_1 = require("@strapi/strapi");
 let worker = null;
 let app = null;
-const startVideoWorker = async () => {
+const startVideoWorker = async (strapi) => {
     if (worker)
         return worker;
-    await getStrapi();
+    app = strapi;
+    console.log('start app', app);
+    // await getStrapi()
     worker = new bullmq_1.Worker("video-render", async (job) => {
         await (0, ffmpeg_1.processVideo)(job.data.documentId);
     }, {
@@ -31,6 +33,7 @@ const startVideoWorker = async () => {
 };
 exports.startVideoWorker = startVideoWorker;
 const stopVideoWorker = async () => {
+    console.log('destroy', worker);
     if (!worker)
         return;
     await worker.close();

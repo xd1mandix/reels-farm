@@ -3,4 +3,4 @@ import "dotenv/config";
 
 // import { config } from "dotenv"
 // config()
-startVideoWorker()
+// startVideoWorker()

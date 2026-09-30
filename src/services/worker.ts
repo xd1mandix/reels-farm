@@ -6,9 +6,13 @@ import { compileStrapi, Core, createStrapi } from "@strapi/strapi";
 let worker = null
 let app = null
 
-export const startVideoWorker = async () => {
+export const startVideoWorker = async (strapi) => {
   if (worker) return worker;
-  await getStrapi()
+  app = strapi
+
+  console.log('start app', app)
+
+  // await getStrapi()
 
   worker = new Worker(
     "video-render",
@@ -37,6 +41,7 @@ export const startVideoWorker = async () => {
 };
 
 export const stopVideoWorker = async () => {
+  console.log('destroy', worker)
   if (!worker) return;
 
   await worker.close();

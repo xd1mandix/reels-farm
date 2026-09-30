@@ -56,6 +56,7 @@ exports.default = {
 };
 // вызывается при каждой загрузке нового видео
 async function refreshAccessToken(account) {
+    console.log('token refresh');
     const oauth = (0, exports.createOAuthClient)();
     oauth.setCredentials({
         refresh_token: account.refreshToken,

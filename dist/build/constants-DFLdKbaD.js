@@ -1,1 +1,0 @@
-import{bU as r,ck as n,bV as e,bW as a}from"./strapi-DYgy_QPR.js";const o="api-token",t="transfer-token",i=r().shape({name:e().max(100).required(a.required.id),type:e().oneOf(["read-only","full-access","custom"]).optional(),description:e().nullable(),lifespan:n().integer().min(0).nullable().defined(a.required.id)});export{o as A,t as T,i as a};

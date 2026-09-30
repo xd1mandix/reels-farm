@@ -30,7 +30,7 @@ exports.default = {
                     },
                 },
             });
-            console.log(now, posts, "[scheduled]");
+            console.log(now, posts.map((item) => { return { title: item.title, id: item.id }; }), "[scheduled]");
             for (const post of posts) {
                 try {
                     // твоя логика публикации

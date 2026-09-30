@@ -14,7 +14,7 @@
             "name": "Apache 2.0",
             "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "x-generation-date": "2026-09-26T07:54:19.203Z"
+        "x-generation-date": "2026-09-30T16:13:11.732Z"
     },
     "x-strapi-config": {
         "plugins": [
@@ -24,7 +24,7 @@
     },
     "servers": [
         {
-            "url": "https://jargon-proofs-stoic.ngrok-free.dev/api",
+            "url": "http://127.0.0.1:1337/api",
             "description": "Development server"
         }
     ],

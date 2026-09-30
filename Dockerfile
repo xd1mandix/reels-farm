@@ -1,25 +1,11 @@
-FROM node:22-alpine AS builder
-
-RUN apk add --no-cache python3 make g++ ffmpeg
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm i
-
-COPY . .
-
-RUN npm run build
-
-# ------------------------
-
 FROM node:22-alpine
 
 RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 
-COPY --from=builder /app ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/.strapi ./.strapi
 
 ENV NODE_ENV=production
 
@@ -30,4 +16,5 @@ USER reelsfarm
 
 EXPOSE 1337
 
+CMD ["node","/app/dist/src/workerBootstrap.js"]
 CMD ["npm","run","start"]

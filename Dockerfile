@@ -8,7 +8,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY .strapi ./
-COPY .dist ./
+COPY dist ./
 COPY public ./
 
 RUN ls .

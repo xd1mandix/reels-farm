@@ -10,9 +10,10 @@ RUN npm ci
 COPY . .
 RUN ls .
 
-
-
 ENV NODE_ENV=production
+
+RUN npm run build
+RUN ls .
 
 EXPOSE 1337
 

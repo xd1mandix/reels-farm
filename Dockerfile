@@ -1,6 +1,7 @@
 FROM node:22-alpine
 
 RUN apk add --no-cache ffmpeg
+RUN ls .
 
 ENV NODE_ENV=production
 

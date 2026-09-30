@@ -11,7 +11,7 @@ COPY . .
 RUN ls .
 
 ENV NODE_ENV=production
-
+RUN docker compose up -d
 RUN npm run build
 RUN ls .
 

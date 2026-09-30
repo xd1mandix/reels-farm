@@ -7,7 +7,9 @@ RUN apk add --no-cache ffmpeg
 COPY package*.json ./
 RUN npm ci
 
-COPY . .
+COPY .strapi ./
+COPY .dist ./
+COPY public ./
 
 RUN ls .
 

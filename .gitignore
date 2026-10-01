@@ -127,11 +127,5 @@ license.txt
 exports
 .strapi-updater.json
 .strapi-cloud.json
-
-############################
-# Dev
-############################
-./config
-./src
-./types
-yarn.lock
+.strapi
+dist

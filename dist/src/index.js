@@ -17,8 +17,9 @@ exports.default = {
      * run jobs, or perform some special logic.
      */
     async bootstrap({ strapi }) {
-        await (0, worker_1.stopVideoWorker)();
-        (0, worker_1.startVideoWorker)(strapi);
+        if (process.env.ENABLE_VIDEO_WORKER === 'true') {
+            (0, worker_1.startVideoWorker)(strapi);
+        }
     },
     async destroy({ strapi }) {
         await (0, worker_1.stopVideoWorker)();

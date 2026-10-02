@@ -18,8 +18,9 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
-    await stopVideoWorker()
-    startVideoWorker(strapi);
+    if (process.env.ENABLE_VIDEO_WORKER === 'true') {
+      startVideoWorker(strapi);
+    }
   },
 
   async destroy({ strapi }: { strapi: Core.Strapi }) {

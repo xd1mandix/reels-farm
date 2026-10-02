@@ -7,7 +7,6 @@ import strapiCloud from "@strapi/plugin-cloud/strapi-admin";
 import documentation from "@strapi/plugin-documentation/strapi-admin";
 import usersPermissions from "@strapi/plugin-users-permissions/strapi-admin";
 import strapiCustomActionPerformPage from "strapi-custom-action-perform-page/strapi-admin";
-import iconsField from "strapi-plugin-icons-field/strapi-admin";
 import { renderAdmin } from "@strapi/strapi/admin";
 
 import customisations from "../../src/admin/app.tsx";
@@ -21,6 +20,5 @@ renderAdmin(document.getElementById("strapi"), {
     documentation: documentation,
     "users-permissions": usersPermissions,
     "strapi-custom-action-perform-page": strapiCustomActionPerformPage,
-    "icons-field": iconsField,
   },
 });

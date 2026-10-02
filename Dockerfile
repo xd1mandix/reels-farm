@@ -19,7 +19,7 @@ COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=1850"
 
 # Собираем Strapi Admin
-RUN npm run build
+# RUN npm run build
 
 # Production
 ENV NODE_ENV=production

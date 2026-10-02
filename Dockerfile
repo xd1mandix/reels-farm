@@ -16,7 +16,7 @@ RUN npm ci
 # Копируем исходники проекта
 COPY . .
 
-ENV NODE_OPTIONS="--max-old-space-size=1568"
+ENV NODE_OPTIONS="--max-old-space-size=1850"
 
 # Собираем Strapi Admin
 RUN npm run build

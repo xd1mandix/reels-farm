@@ -1,21 +1,27 @@
-FROM node:22-alpine
+FROM node:24-bookworm-slim
+
+# FFmpeg нужен для обработки видео
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-RUN apk add --no-cache ffmpeg
-
+# Сначала копируем package-файлы для кеширования Docker layer
 COPY package*.json ./
+
+# Устанавливаем зависимости
 RUN npm ci
 
+# Копируем исходники проекта
 COPY . .
-RUN ls .
 
-ENV NODE_ENV=production
-RUN docker compose up -d
+# Собираем Strapi Admin
 RUN npm run build
-RUN ls .
+
+# Production
+ENV NODE_ENV=production
 
 EXPOSE 1337
 
-CMD ["node","./dist/src/workerBootstrap.js"]
-CMD ["npm","run","start"]
+CMD ["npm", "run", "start"]

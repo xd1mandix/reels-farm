@@ -1,0 +1,1 @@
+import{aC as s,aD as c,q as a}from"./strapi-BpsLP0DD.js";function g(o){const e=s().getMonitor(),[t,r]=c(e,o);return a.useEffect(()=>e.subscribeToOffsetChange(r)),a.useEffect(()=>e.subscribeToStateChange(r)),t}export{g as u};

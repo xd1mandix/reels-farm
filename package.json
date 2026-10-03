@@ -49,6 +49,9 @@
     "node": ">=22.13",
     "npm": ">=6.0.0"
   },
+  "overrides": {
+    "@swc/core": "1.13.20"
+  },
   "strapi": {
     "uuid": "0ce88755-9d92-4a6d-bbdf-f76873719c18",
     "installId": "df02c4d4fe9db9fabe306c6c5c0c0a90ccdfd3b166ad6aeb8413d3d06d8e18da"

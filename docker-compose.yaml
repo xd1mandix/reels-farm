@@ -38,8 +38,6 @@ services:
     image: ngrok/ngrok:latest
     container_name: reelsfarm-ngrok
     restart: unless-stopped
-    depends_on:
-      - strapi
     command: http strapi:1337
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}

@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_shared_series_lists",
+  "info": {
+    "displayName": "series-list",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "episodes": {
+      "type": "component",
+      "component": "shared.episode-link",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,19 @@
+{
+    "collectionName": "components_shared_category_lists",
+    "info": {
+        "displayName": "category-list",
+        "icon": "apps"
+    },
+    "options": {},
+    "attributes": {
+        "category": {
+            "type": "string"
+        },
+        "series": {
+            "type": "component",
+            "component": "shared.series-list",
+            "repeatable": true
+        }
+    },
+    "config": {}
+}

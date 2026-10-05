@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_shared_episode_links",
+  "info": {
+    "displayName": "episode-link",
+    "icon": "attachment"
+  },
+  "options": {},
+  "attributes": {
+    "season": {
+      "type": "integer",
+      "min": 0
+    },
+    "episode": {
+      "type": "integer",
+      "min": 0
+    },
+    "link": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "config": {}
+}

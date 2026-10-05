@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres:17
-    container_name: reelsfarm-postgres
+    container_name: reelsfarm-postgres1
     restart: unless-stopped
     environment:
       POSTGRES_DB: strapi
@@ -16,7 +16,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: reelsfarm-redis
+    container_name: reelsfarm-redis1
     restart: unless-stopped
     ports:
       - "127.0.0.1:6379:6379"

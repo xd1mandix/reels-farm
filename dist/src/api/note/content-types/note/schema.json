@@ -1,0 +1,21 @@
+{
+    "kind": "singleType",
+    "collectionName": "notes",
+    "info": {
+        "singularName": "note",
+        "pluralName": "notes",
+        "displayName": "notes"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "categories": {
+            "type": "dynamiczone",
+            "components": [
+                "shared.category-list"
+            ]
+        }
+    }
+}

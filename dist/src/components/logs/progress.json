@@ -1,0 +1,21 @@
+{
+    "collectionName": "components_logs_progresses",
+    "info": {
+        "displayName": "progress",
+        "icon": "server"
+    },
+    "options": {},
+    "attributes": {
+        "processed": {
+            "type": "integer",
+            "default": 0,
+            "min": 0
+        },
+        "queue": {
+            "type": "integer",
+            "default": 0,
+            "min": 0
+        }
+    },
+    "config": {}
+}

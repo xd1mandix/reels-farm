@@ -1,0 +1,17 @@
+{
+    "collectionName": "components_shared_simple_notes",
+    "info": {
+        "displayName": "simple-note",
+        "icon": "file"
+    },
+    "options": {},
+    "attributes": {
+        "title": {
+            "type": "string"
+        },
+        "content": {
+            "type": "blocks"
+        }
+    },
+    "config": {}
+}

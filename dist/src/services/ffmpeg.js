@@ -41,6 +41,9 @@ async function processVideo(documentId) {
             partnership: {
                 populate: '*'
             },
+            tags: {
+                populate: '*'
+            },
             start: {
                 populate: '*'
             },
@@ -86,6 +89,7 @@ async function processVideo(documentId) {
     await (0, logging_1.addQueue)(strapi, video.parts);
     // split video
     for (let i = 0; i < video.parts; i++) {
+        await (0, logging_1.addLog)(strapi, `${i.toString()} '[processing]'`);
         const start = startTime + i * partDuration;
         const output = getPublicPath(`/temp/${documentId}_${i}.mp4`);
         await renderPart({
@@ -103,7 +107,7 @@ async function processVideo(documentId) {
             await strapi.documents("api::post.post").create({
                 data: {
                     title: `${video.title} part ${i + 1}`,
-                    description: `${video.description || ''}\n${((_e = video.partnership) === null || _e === void 0 ? void 0 : _e.post_content) || ''}`,
+                    description: `${video.description || ''}\n${((_e = video.partnership) === null || _e === void 0 ? void 0 : _e.post_content) || ''}\n${video.tags.map((i) => `#${i.value}`).join(' ')}`,
                     video_orig: video.documentId,
                     publishing: publishDates[i],
                     publish_status: 'scheduled',
@@ -113,7 +117,7 @@ async function processVideo(documentId) {
                     }
                 },
             });
-            await (0, logging_1.addLog)(strapi, `${i}, ${JSON.stringify(media)} '[upladed]'`);
+            await (0, logging_1.addLog)(strapi, `${i} '[upladed]'`);
             console.log(i.toString(), JSON.stringify(media), "[upladed]");
             await (0, logging_1.addProgress)(strapi);
         }

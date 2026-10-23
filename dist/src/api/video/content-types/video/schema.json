@@ -41,7 +41,7 @@
         "speed": {
             "type": "decimal",
             "required": false,
-            "default": 1.1,
+            "default": 1.2,
             "min": 0.1,
             "max": 5
         },
@@ -63,6 +63,11 @@
             "relation": "manyToOne",
             "target": "api::partnership.partnership",
             "inversedBy": "videos"
+        },
+        "tags": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::tag.tag"
         },
         "start": {
             "type": "component",

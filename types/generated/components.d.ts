@@ -76,6 +76,18 @@ export interface SharedSeriesList extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedSimpleNote extends Struct.ComponentSchema {
+  collectionName: 'components_shared_simple_notes';
+  info: {
+    displayName: 'simple-note';
+    icon: 'file';
+  };
+  attributes: {
+    content: Schema.Attribute.Blocks;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface SharedTimecode extends Struct.ComponentSchema {
   collectionName: 'components_shared_timecodes';
   info: {
@@ -110,6 +122,7 @@ declare module '@strapi/strapi' {
       'shared.category-list': SharedCategoryList;
       'shared.episode-link': SharedEpisodeLink;
       'shared.series-list': SharedSeriesList;
+      'shared.simple-note': SharedSimpleNote;
       'shared.timecode': SharedTimecode;
     }
   }

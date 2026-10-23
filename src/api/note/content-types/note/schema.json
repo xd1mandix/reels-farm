@@ -14,7 +14,8 @@
     "categories": {
       "type": "dynamiczone",
       "components": [
-        "shared.category-list"
+        "shared.category-list",
+        "shared.simple-note"
       ]
     }
   }

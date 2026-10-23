@@ -130,3 +130,4 @@ exports
 # build
 .strapi-updater.json
 .strapi-cloud.json
+!src/components/logs

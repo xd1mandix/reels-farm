@@ -479,6 +479,34 @@ export interface ApiAccountAccount extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiLogLog extends Struct.SingleTypeSchema {
+  collectionName: 'logs';
+  info: {
+    displayName: 'logs';
+    pluralName: 'logs';
+    singularName: 'log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    errors: Schema.Attribute.JSON;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::log.log'> &
+      Schema.Attribute.Private;
+    logs: Schema.Attribute.JSON;
+    progress: Schema.Attribute.Component<'logs.progress', false> &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiNoteNote extends Struct.SingleTypeSchema {
   collectionName: 'notes';
   info: {
@@ -593,11 +621,14 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::video.video'> &
       Schema.Attribute.Private;
+    overlay: Schema.Attribute.Media<'videos'>;
     partnership: Schema.Attribute.Relation<
       'manyToOne',
       'api::partnership.partnership'
     >;
-    parts: Schema.Attribute.Integer & Schema.Attribute.Required;
+    parts: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<5>;
     posts: Schema.Attribute.Relation<'oneToMany', 'api::post.post'>;
     publishedAt: Schema.Attribute.DateTime;
     speed: Schema.Attribute.Decimal &
@@ -608,7 +639,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
         },
         number
       > &
-      Schema.Attribute.DefaultTo<1>;
+      Schema.Attribute.DefaultTo<1.1>;
     start: Schema.Attribute.Component<'shared.timecode', false>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -1130,6 +1161,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::account.account': ApiAccountAccount;
+      'api::log.log': ApiLogLog;
       'api::note.note': ApiNoteNote;
       'api::partnership.partnership': ApiPartnershipPartnership;
       'api::post.post': ApiPostPost;

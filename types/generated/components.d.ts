@@ -1,5 +1,31 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface LogsProgress extends Struct.ComponentSchema {
+  collectionName: 'components_logs_progresses';
+  info: {
+    displayName: 'progress';
+    icon: 'server';
+  };
+  attributes: {
+    processed: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    queue: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+  };
+}
+
 export interface SharedCategoryList extends Struct.ComponentSchema {
   collectionName: 'components_shared_category_lists';
   info: {
@@ -80,6 +106,7 @@ export interface SharedTimecode extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export namespace Public {
     export interface ComponentSchemas {
+      'logs.progress': LogsProgress;
       'shared.category-list': SharedCategoryList;
       'shared.episode-link': SharedEpisodeLink;
       'shared.series-list': SharedSeriesList;

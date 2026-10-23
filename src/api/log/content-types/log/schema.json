@@ -1,0 +1,27 @@
+{
+  "kind": "singleType",
+  "collectionName": "logs",
+  "info": {
+    "singularName": "log",
+    "pluralName": "logs",
+    "displayName": "logs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "progress": {
+      "type": "component",
+      "component": "logs.progress",
+      "repeatable": false,
+      "required": true
+    },
+    "logs": {
+      "type": "json"
+    },
+    "errors": {
+      "type": "json"
+    }
+  }
+}

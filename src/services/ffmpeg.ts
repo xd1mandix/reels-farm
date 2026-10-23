@@ -5,16 +5,23 @@ import fs from "fs";
 import path from "path";
 import { getStrapi } from "./worker";
 import { getPublishingDates } from "./schedule";
+import { addError, addLog, addProgress, addQueue, clearErrors, setQueue } from "./logging";
 
 ffmpeg.setFfprobePath(ffprobe.path);
 
 export async function processVideo(documentId: string) {
   const strapi = await getStrapi()
 
+  await clearErrors(strapi)
+  await setQueue(strapi, 0)
+
   const video = await strapi.documents("api::video.video").findOne({
     documentId,
     populate: {
       video: {
+        populate: '*'
+      },
+      overlay: {
         populate: '*'
       },
       posts: {
@@ -33,7 +40,7 @@ export async function processVideo(documentId: string) {
         populate: '*'
       },
     },
-  });
+  })
 
 
   const videoPath = getPublicPath(video.video.url)
@@ -41,6 +48,7 @@ export async function processVideo(documentId: string) {
   let workingVideo = videoPath;
   const speed = video.speed || 1;
 
+  await addLog(strapi, `${workingVideo} '[read]'`)
   console.log(workingVideo, '[read]')
   // If Speed is != 1 - change speed in tmp file
   if (speed !== 1) {
@@ -49,6 +57,7 @@ export async function processVideo(documentId: string) {
     await changeSpeed(videoPath, speedPath, video.speed);
 
     workingVideo = speedPath;
+    await addLog(strapi, `${workingVideo} '[sped up]'`)
     console.log(workingVideo, '[sped up]')
   }
 
@@ -82,7 +91,9 @@ export async function processVideo(documentId: string) {
     video.parts
   );
 
+  await addLog(strapi, `${JSON.stringify(publishDates)} '[planned]'`)
   console.log(JSON.stringify(publishDates), '[planned]')
+  await addQueue(strapi, video.parts)
 
   // split video
   for (let i = 0; i < video.parts; i++) {
@@ -94,13 +105,15 @@ export async function processVideo(documentId: string) {
     await renderPart({
       input: workingVideo,
       image: imgPath,
-      overlay: null, //video.overlayVideo?.url,
+      overlay: video.overlay?.url,
       start,
       duration: partDuration,
       output,
     });
 
+    await addLog(strapi, `${i.toString()}, ${output} '[rendered]'`)
     console.log(i.toString(), output, "[rendered]")
+
     try {
       const media = await uploadToStrapi(output, `${documentId}_${i}`);
 
@@ -118,11 +131,16 @@ export async function processVideo(documentId: string) {
         },
       });
 
+      await addLog(strapi, `${i}, ${JSON.stringify(media)} '[upladed]'`)
       console.log(i.toString(), JSON.stringify(media), "[upladed]")
+      await addProgress(strapi)
 
+    } catch (e) {
+      await addError(strapi, e)
     } finally {
       // Delete tmp file
       await fs.unlink(output, () => { })
+      await addLog(strapi, `${i}, ${output} '[deleted]'`)
       console.log(output, "[deleted]")
     }
   }
@@ -155,7 +173,7 @@ export function getDuration(filePath: string): Promise<number> {
 
       resolve(metadata.format.duration ?? 0);
     });
-  });
+  })
 }
 
 export function changeSpeed(
@@ -172,7 +190,7 @@ export function changeSpeed(
       .outputOptions("-movflags", "+faststart")
       .save(output)
       .on("end", () => resolve())
-      .on("error", reject);
+      .on("error", async (err) => { await addError(strapi, err); reject(err) });
   });
 }
 
@@ -230,8 +248,7 @@ export function renderPart(options) {
       .output(options.output)
       .on("end", resolve)
       .on("stderr", line => console.log(line))
-      .on("error", err => console.error(err))
-      .on("error", reject)
+      .on("error", async (err) => { await addError(strapi, err); reject(err) })
       .run();
   });
 }
@@ -268,8 +285,8 @@ const newComposition = (options) => {
   filters.push(
     "color=c=black:s=1080x1920:d=1[bg]",
     hasOverlay
-      ? "[0:v]scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
-      : "[0:v]scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]"
+      ? "[0:v]hflip,scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
+      : "[0:v]hflip,scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]"
   );
 
   if (hasOverlay) {

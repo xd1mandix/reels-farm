@@ -16,14 +16,20 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const worker_1 = require("./worker");
 const schedule_1 = require("./schedule");
+const logging_1 = require("./logging");
 fluent_ffmpeg_1.default.setFfprobePath(ffprobe_static_1.default.path);
 async function processVideo(documentId) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     const strapi = await (0, worker_1.getStrapi)();
+    await (0, logging_1.clearErrors)(strapi);
+    await (0, logging_1.setQueue)(strapi, 0);
     const video = await strapi.documents("api::video.video").findOne({
         documentId,
         populate: {
             video: {
+                populate: '*'
+            },
+            overlay: {
                 populate: '*'
             },
             posts: {
@@ -46,12 +52,14 @@ async function processVideo(documentId) {
     const videoPath = getPublicPath(video.video.url);
     let workingVideo = videoPath;
     const speed = video.speed || 1;
+    await (0, logging_1.addLog)(strapi, `${workingVideo} '[read]'`);
     console.log(workingVideo, '[read]');
     // If Speed is != 1 - change speed in tmp file
     if (speed !== 1) {
         const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`);
         await changeSpeed(videoPath, speedPath, video.speed);
         workingVideo = speedPath;
+        await (0, logging_1.addLog)(strapi, `${workingVideo} '[sped up]'`);
         console.log(workingVideo, '[sped up]');
     }
     const fullDuration = await getDuration(workingVideo);
@@ -73,7 +81,9 @@ async function processVideo(documentId) {
     }
     // Plan every part through 4 hours after the last one
     const publishDates = await (0, schedule_1.getPublishingDates)(strapi, video.account.documentId, video.parts);
+    await (0, logging_1.addLog)(strapi, `${JSON.stringify(publishDates)} '[planned]'`);
     console.log(JSON.stringify(publishDates), '[planned]');
+    await (0, logging_1.addQueue)(strapi, video.parts);
     // split video
     for (let i = 0; i < video.parts; i++) {
         const start = startTime + i * partDuration;
@@ -81,18 +91,19 @@ async function processVideo(documentId) {
         await renderPart({
             input: workingVideo,
             image: imgPath,
-            overlay: null, //video.overlayVideo?.url,
+            overlay: (_d = video.overlay) === null || _d === void 0 ? void 0 : _d.url,
             start,
             duration: partDuration,
             output,
         });
+        await (0, logging_1.addLog)(strapi, `${i.toString()}, ${output} '[rendered]'`);
         console.log(i.toString(), output, "[rendered]");
         try {
             const media = await uploadToStrapi(output, `${documentId}_${i}`);
             await strapi.documents("api::post.post").create({
                 data: {
                     title: `${video.title} part ${i + 1}`,
-                    description: `${video.description || ''}\n${((_d = video.partnership) === null || _d === void 0 ? void 0 : _d.post_content) || ''}`,
+                    description: `${video.description || ''}\n${((_e = video.partnership) === null || _e === void 0 ? void 0 : _e.post_content) || ''}`,
                     video_orig: video.documentId,
                     publishing: publishDates[i],
                     publish_status: 'scheduled',
@@ -102,11 +113,17 @@ async function processVideo(documentId) {
                     }
                 },
             });
+            await (0, logging_1.addLog)(strapi, `${i}, ${JSON.stringify(media)} '[upladed]'`);
             console.log(i.toString(), JSON.stringify(media), "[upladed]");
+            await (0, logging_1.addProgress)(strapi);
+        }
+        catch (e) {
+            await (0, logging_1.addError)(strapi, e);
         }
         finally {
             // Delete tmp file
             await fs_1.default.unlink(output, () => { });
+            await (0, logging_1.addLog)(strapi, `${i}, ${output} '[deleted]'`);
             console.log(output, "[deleted]");
         }
     }
@@ -142,7 +159,7 @@ function changeSpeed(input, output, speed) {
             .outputOptions("-movflags", "+faststart")
             .save(output)
             .on("end", () => resolve())
-            .on("error", reject);
+            .on("error", async (err) => { await (0, logging_1.addError)(strapi, err); reject(err); });
     });
 }
 function buildAtempo(speed) {
@@ -188,8 +205,7 @@ function renderPart(options) {
             .output(options.output)
             .on("end", resolve)
             .on("stderr", line => console.log(line))
-            .on("error", err => console.error(err))
-            .on("error", reject)
+            .on("error", async (err) => { await (0, logging_1.addError)(strapi, err); reject(err); })
             .run();
     });
 }
@@ -216,8 +232,8 @@ const newComposition = (options) => {
     const hasOverlay = !!options.overlay;
     const overlayIndex = hasImg ? 2 : 1;
     filters.push("color=c=black:s=1080x1920:d=1[bg]", hasOverlay
-        ? "[0:v]scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
-        : "[0:v]scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]");
+        ? "[0:v]hflip,scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
+        : "[0:v]hflip,scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]");
     if (hasOverlay) {
         filters.push(`[${overlayIndex}:v]scale=1080:768:force_original_aspect_ratio=increase,crop=1080:768[bottom]`);
     }

@@ -6,6 +6,7 @@ const bullmq_1 = require("bullmq");
 const redis_1 = require("./redis");
 const ffmpeg_1 = require("./ffmpeg");
 const strapi_1 = require("@strapi/strapi");
+const logging_1 = require("./logging");
 let worker = null;
 let app = null;
 const startVideoWorker = async (strapi) => {
@@ -26,8 +27,9 @@ const startVideoWorker = async (strapi) => {
     worker.on("completed", job => {
         console.log(`Job ${job.id} completed`);
     });
-    worker.on("failed", (job, err) => {
+    worker.on("failed", async (job, err) => {
         console.error(err);
+        await (0, logging_1.addError)(strapi, err);
     });
     return worker;
 };

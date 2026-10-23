@@ -26,14 +26,22 @@
                 "videos"
             ]
         },
+        "overlay": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "videos"
+            ]
+        },
         "parts": {
             "type": "integer",
-            "required": true
+            "required": true,
+            "default": 5
         },
         "speed": {
             "type": "decimal",
             "required": false,
-            "default": 1,
+            "default": 1.1,
             "min": 0.1,
             "max": 5
         },

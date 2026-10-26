@@ -34,28 +34,23 @@ services:
     expose:
       - "6379"
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    container_name: reelsfarm-ngrok
+  caddy:
+    image: caddy:2
+    container_name: reelsfarm-caddy
     restart: unless-stopped
-    command: http strapi:1337
-    environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: reelsfarm-nginx
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - strapi
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d
-  #     - ./certbot/www:/var/www/certbot
-  #     - ./certbot/conf:/etc/letsencrypt
-  #     - uploads:/app/uploads:ro
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - strapi
 
 volumes:
   postgres:
   uploads:
+  caddy_data:
+  caddy_config:

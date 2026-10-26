@@ -3,11 +3,19 @@ import ffprobe from "ffprobe-static";
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import { readdir } from 'node:fs/promises';
 import { getStrapi } from "./worker";
 import { getPublishingDates } from "./schedule";
 import { addError, addLog, addProgress, addQueue, clearErrors, setQueue } from "./logging";
 
 ffmpeg.setFfprobePath(ffprobe.path);
+
+const OVERLAY_DIR = path.resolve(
+  process.cwd(),
+  'public',
+  'uploads',
+  'overlay',
+);
 
 export async function processVideo(documentId: string) {
   const strapi = await getStrapi()
@@ -105,11 +113,12 @@ export async function processVideo(documentId: string) {
     const start = startTime + i * partDuration;
 
     const output = getPublicPath(`/temp/${documentId}_${i}.mp4`);
+    const overlay = video.overlay?.url || await getRandomOverlay()
 
     await renderPart({
       input: workingVideo,
       image: imgPath,
-      overlay: video.overlay?.url,
+      overlay: overlay,
       start,
       duration: partDuration,
       output,
@@ -178,6 +187,24 @@ export function getDuration(filePath: string): Promise<number> {
       resolve(metadata.format.duration ?? 0);
     });
   })
+}
+
+export async function getRandomOverlay(): Promise<string | null> {
+  const files = await readdir(OVERLAY_DIR, {
+    withFileTypes: true,
+  });
+
+  const videos = files
+    .filter((file) => file.isFile())
+    .map((file) => file.name)
+
+  if (videos.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * videos.length);
+
+  return path.join(OVERLAY_DIR, videos[randomIndex]);
 }
 
 export function changeSpeed(

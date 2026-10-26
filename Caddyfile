@@ -1,0 +1,4 @@
+vm4687830.firstbyte.club {
+    encode zstd gzip
+    reverse_proxy strapi:1337
+}

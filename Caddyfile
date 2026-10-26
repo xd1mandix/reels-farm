@@ -1,4 +1,4 @@
-vm4687830.firstbyte.club {
+xd1mandix.ru {
     encode zstd gzip
     reverse_proxy strapi:1337
 }

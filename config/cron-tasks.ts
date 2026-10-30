@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { pingLogs } from '../src/services/logging';
 import { getPublicPath } from '../src/services/ffmpeg';
 import { publishToYoutube } from '../src/api/youtube/services/youtube';
 import { publishToInstagram } from '../src/api/instagram/services/instagram';
@@ -49,6 +50,14 @@ export default {
       // rule: "* * * * *",
     },
   },
+  logging: {
+    task: async ({ strapi }) => {
+      await pingLogs(strapi)
+    },
+    options: {
+      rule: "* * * * *", // каждую минуту
+    },
+  }
 };
 
 async function publish(strapi: any, post: any) {

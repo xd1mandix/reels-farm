@@ -1,1 +1,0 @@
-import{c5 as e}from"./strapi-DHAKNWD8.js";const o=e(s=>s.admin_app.permissions);export{o as s};

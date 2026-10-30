@@ -1,7 +1,10 @@
+
 import type { Core } from '@strapi/strapi';
 
 const UID = 'api::log.log' as const;
 const MAX_LOGS = 50;
+
+let isLogging = false
 
 type LogValue = string | Record<string, unknown>;
 
@@ -18,13 +21,21 @@ type ErrorValue = {
     details?: unknown;
 };
 
+export function setLogging(state: boolean) {
+    isLogging = state
+}
+
+// Текущий статус в памяти процесса Strapi.
+// addLog изменяет его, а pingLogs сохраняет в БД.
+let currentStatus: LogValue | null = null;
+
 const getLogsDocument = async (strapi: Core.Strapi) => {
-    let doc = await strapi.documents('api::log.log').findFirst({
+    let doc = await strapi.documents(UID).findFirst({
         populate: {
             progress: {
-                populate: '*'
-            }
-        }
+                populate: '*',
+            },
+        },
     });
 
     if (doc) return doc;
@@ -40,7 +51,17 @@ const getLogsDocument = async (strapi: Core.Strapi) => {
         },
     });
 
-    return doc
+    return doc;
+};
+
+/**
+ * Извлекает статус из строки лога,
+ * удаляя дату и счетчик пингов.
+ */
+const extractStatus = (log: string): string => {
+    return log
+        .replace(/^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s*/, '')
+        .replace(/\s+x\d+$/, '');
 };
 
 const getProgress = (progress: unknown): Progress => {
@@ -55,32 +76,63 @@ const getProgress = (progress: unknown): Progress => {
     return { processed, queue };
 };
 
+
 /**
- * Добавляет строку в лог.
- * Хранит максимум 50 последних записей.
+ * Обновляет текущий статус в памяти.
+ * В базу данных ничего не записывает.
  */
 export async function addLog(
-    strapi: Core.Strapi,
+    _strapi: Core.Strapi,
     log: LogValue,
 ): Promise<void> {
+    currentStatus = log;
+}
+
+/**
+ * Сохраняет текущий статус в Single Type.
+ *
+ * Если статус совпадает с последней записью, увеличивает pings.
+ * Если отличается — создаёт новую запись.
+ */
+export async function pingLogs(
+    strapi: Core.Strapi,
+): Promise<void> {
+    if (!isLogging) return
+    if (currentStatus === null) return;
+
     const doc = await getLogsDocument(strapi);
+    const logs: any[] = Array.isArray(doc.logs)
+        ? [...doc.logs]
+        : [];
 
-    const logs = Array.isArray(doc.logs) ? [...doc.logs] : [];
+    const status =
+        typeof currentStatus === 'string'
+            ? currentStatus
+            : JSON.stringify(currentStatus);
 
-    const entry =
-        typeof log === 'string'
-            ? `[${new Date().toISOString()}] ${log}`
-            : {
-                timestamp: new Date().toISOString(),
-                ...log,
-            };
+    const lastLog = logs.at(-1);
 
-    logs.push(entry);
+    if (lastLog && extractStatus(lastLog) === status) {
+        const match = lastLog.match(/ x(\d+)$/);
+        const pings = match ? Number(match[1]) + 1 : 2;
+
+        logs[logs.length - 1] =
+            `${lastLog.replace(/\s+x\d+$/, '')} x${pings}`;
+    } else {
+        const timestamp = new Date()
+            .toISOString()
+            .replace('T', ' ')
+            .slice(0, 19);
+
+        logs.push(`[${timestamp}] ${status}`);
+    }
 
     await strapi.documents(UID).update({
         documentId: doc.documentId,
         data: {
-            logs: logs.slice(-MAX_LOGS),
+            logs: JSON.parse(
+                JSON.stringify(logs.slice(-MAX_LOGS)),
+            ),
         },
     });
 }
@@ -109,7 +161,6 @@ export async function addError(
     err: unknown,
 ): Promise<void> {
     const doc = await getLogsDocument(strapi);
-
     const errors = Array.isArray(doc.errors) ? [...doc.errors] : [];
 
     let entry: ErrorValue;
@@ -137,6 +188,8 @@ export async function addError(
     }
 
     errors.push(JSON.stringify(entry));
+
+    setLogging(false)
 
     await strapi.documents(UID).update({
         documentId: doc.documentId,
@@ -170,7 +223,6 @@ export async function addProgress(
 
 /**
  * Устанавливает количество запланированных видео.
- * Если queue меньше processed, processed уменьшается до queue.
  */
 export async function setQueue(
     strapi: Core.Strapi,
@@ -197,7 +249,7 @@ export async function setQueue(
  */
 export async function addQueue(
     strapi: Core.Strapi,
-    count: number
+    count: number,
 ): Promise<void> {
     const doc = await getLogsDocument(strapi);
     const progress = getProgress(doc.progress);

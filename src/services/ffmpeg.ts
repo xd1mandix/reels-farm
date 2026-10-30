@@ -6,22 +6,26 @@ import path from "path";
 import { readdir } from 'node:fs/promises';
 import { getStrapi } from "./worker";
 import { getPublishingDates } from "./schedule";
-import { addError, addLog, addProgress, addQueue, clearErrors, setQueue } from "./logging";
+import { addError, addLog, addProgress, addQueue, clearErrors, setLogging, setQueue } from "./logging";
 
 ffmpeg.setFfprobePath(ffprobe.path);
 
-const OVERLAY_DIR = path.resolve(
-  process.cwd(),
-  'public',
-  'uploads',
-  'overlay',
-);
+const OVERLAY_FILES = []
+const VIDEO_EXTENSIONS = new Set([
+  '.mp4',
+  '.mov',
+  '.mkv',
+  '.webm',
+  '.avi',
+  '.m4v',
+]);
 
 export async function processVideo(documentId: string) {
   const strapi = await getStrapi()
 
   await clearErrors(strapi)
   await setQueue(strapi, 0)
+  await setLogging(true)
 
   const video = await strapi.documents("api::video.video").findOne({
     documentId,
@@ -61,8 +65,13 @@ export async function processVideo(documentId: string) {
 
   await addLog(strapi, `${workingVideo} '[read]'`)
   console.log(workingVideo, '[read]')
+  await addQueue(strapi, video.parts)
+
   // If Speed is != 1 - change speed in tmp file
   if (speed !== 1) {
+    await addLog(strapi, `${workingVideo} '[speeding up]'`)
+    console.log(workingVideo, '[speeding up]')
+
     const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`)
 
     await changeSpeed(videoPath, speedPath, video.speed);
@@ -104,7 +113,6 @@ export async function processVideo(documentId: string) {
 
   await addLog(strapi, `${JSON.stringify(publishDates)} '[planned]'`)
   console.log(JSON.stringify(publishDates), '[planned]')
-  await addQueue(strapi, video.parts)
 
   // split video
   for (let i = 0; i < video.parts; i++) {
@@ -155,6 +163,7 @@ export async function processVideo(documentId: string) {
       await fs.unlink(output, () => { })
       await addLog(strapi, `${i}, ${output} '[deleted]'`)
       console.log(output, "[deleted]")
+      await setLogging(false)
     }
   }
 
@@ -190,21 +199,43 @@ export function getDuration(filePath: string): Promise<number> {
 }
 
 export async function getRandomOverlay(): Promise<string | null> {
-  const files = await readdir(OVERLAY_DIR, {
-    withFileTypes: true,
-  });
+  let videos = OVERLAY_FILES
 
-  const videos = files
-    .filter((file) => file.isFile())
-    .map((file) => file.name)
+  if (!videos.length) {
+    const files = await strapi.documents('plugin::upload.file').findMany({
+      filters: {
+        folder: {
+          name: {
+            $eq: 'overlay',
+          },
+        },
+      },
+      fields: ['name', 'url', 'mime', 'ext'],
+      limit: 1000,
+    });
 
-  if (videos.length === 0) {
-    return null;
+    videos = files.filter(
+      (file) =>
+        file.mime?.startsWith('video/') &&
+        VIDEO_EXTENSIONS.has(file.ext?.toLowerCase() ?? '') &&
+        file.url?.startsWith('/uploads/'),
+    );
+
+    OVERLAY_FILES.concat(videos)
+
+    if (videos.length === 0) {
+      strapi.log.warn('В папке overlay не найдены видеофайлы');
+      return null;
+    }
   }
 
-  const randomIndex = Math.floor(Math.random() * videos.length);
+  const selected = videos[Math.floor(Math.random() * videos.length)];
 
-  return path.join(OVERLAY_DIR, videos[randomIndex]);
+  return path.resolve(
+    process.cwd(),
+    'public',
+    selected.url.replace(/^\/+/, ''),
+  );
 }
 
 export function changeSpeed(

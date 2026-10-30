@@ -18,6 +18,7 @@ exports.default = {
      */
     async bootstrap({ strapi }) {
         if (process.env.ENABLE_VIDEO_WORKER === 'true') {
+            console.log('bootstrap');
             await (0, worker_1.stopVideoWorker)();
             (0, worker_1.startVideoWorker)(strapi);
         }

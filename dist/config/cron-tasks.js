@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
+const logging_1 = require("../src/services/logging");
 const ffmpeg_1 = require("../src/services/ffmpeg");
 const youtube_1 = require("../src/api/youtube/services/youtube");
 const instagram_1 = require("../src/api/instagram/services/instagram");
@@ -49,6 +50,14 @@ exports.default = {
             // rule: "* * * * *",
         },
     },
+    logging: {
+        task: async ({ strapi }) => {
+            await (0, logging_1.pingLogs)(strapi);
+        },
+        options: {
+            rule: "* * * * *", // каждую минуту
+        },
+    }
 };
 async function publish(strapi, post) {
     switch (post.account.platform) {

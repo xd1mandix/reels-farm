@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.processVideo = processVideo;
 exports.getPublicPath = getPublicPath;
 exports.getDuration = getDuration;
+exports.getRandomOverlay = getRandomOverlay;
 exports.changeSpeed = changeSpeed;
 exports.renderPart = renderPart;
 exports.uploadToStrapi = uploadToStrapi;
@@ -18,11 +19,21 @@ const worker_1 = require("./worker");
 const schedule_1 = require("./schedule");
 const logging_1 = require("./logging");
 fluent_ffmpeg_1.default.setFfprobePath(ffprobe_static_1.default.path);
+const OVERLAY_FILES = [];
+const VIDEO_EXTENSIONS = new Set([
+    '.mp4',
+    '.mov',
+    '.mkv',
+    '.webm',
+    '.avi',
+    '.m4v',
+]);
 async function processVideo(documentId) {
     var _a, _b, _c, _d, _e;
     const strapi = await (0, worker_1.getStrapi)();
     await (0, logging_1.clearErrors)(strapi);
     await (0, logging_1.setQueue)(strapi, 0);
+    await (0, logging_1.setLogging)(true);
     const video = await strapi.documents("api::video.video").findOne({
         documentId,
         populate: {
@@ -57,8 +68,11 @@ async function processVideo(documentId) {
     const speed = video.speed || 1;
     await (0, logging_1.addLog)(strapi, `${workingVideo} '[read]'`);
     console.log(workingVideo, '[read]');
+    await (0, logging_1.addQueue)(strapi, video.parts);
     // If Speed is != 1 - change speed in tmp file
     if (speed !== 1) {
+        await (0, logging_1.addLog)(strapi, `${workingVideo} '[speeding up]'`);
+        console.log(workingVideo, '[speeding up]');
         const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`);
         await changeSpeed(videoPath, speedPath, video.speed);
         workingVideo = speedPath;
@@ -86,16 +100,16 @@ async function processVideo(documentId) {
     const publishDates = await (0, schedule_1.getPublishingDates)(strapi, video.account.documentId, video.parts);
     await (0, logging_1.addLog)(strapi, `${JSON.stringify(publishDates)} '[planned]'`);
     console.log(JSON.stringify(publishDates), '[planned]');
-    await (0, logging_1.addQueue)(strapi, video.parts);
     // split video
     for (let i = 0; i < video.parts; i++) {
         await (0, logging_1.addLog)(strapi, `${i.toString()} '[processing]'`);
         const start = startTime + i * partDuration;
         const output = getPublicPath(`/temp/${documentId}_${i}.mp4`);
+        const overlay = ((_d = video.overlay) === null || _d === void 0 ? void 0 : _d.url) || await getRandomOverlay();
         await renderPart({
             input: workingVideo,
             image: imgPath,
-            overlay: (_d = video.overlay) === null || _d === void 0 ? void 0 : _d.url,
+            overlay: overlay,
             start,
             duration: partDuration,
             output,
@@ -129,6 +143,7 @@ async function processVideo(documentId) {
             await fs_1.default.unlink(output, () => { });
             await (0, logging_1.addLog)(strapi, `${i}, ${output} '[deleted]'`);
             console.log(output, "[deleted]");
+            await (0, logging_1.setLogging)(false);
         }
     }
     await fs_1.default.unlink(workingVideo, () => { });
@@ -153,6 +168,35 @@ function getDuration(filePath) {
             resolve((_a = metadata.format.duration) !== null && _a !== void 0 ? _a : 0);
         });
     });
+}
+async function getRandomOverlay() {
+    let videos = OVERLAY_FILES;
+    if (!videos.length) {
+        const files = await strapi.documents('plugin::upload.file').findMany({
+            filters: {
+                folder: {
+                    name: {
+                        $eq: 'overlay',
+                    },
+                },
+            },
+            fields: ['name', 'url', 'mime', 'ext'],
+            limit: 1000,
+        });
+        videos = files.filter((file) => {
+            var _a, _b, _c, _d;
+            return ((_a = file.mime) === null || _a === void 0 ? void 0 : _a.startsWith('video/')) &&
+                VIDEO_EXTENSIONS.has((_c = (_b = file.ext) === null || _b === void 0 ? void 0 : _b.toLowerCase()) !== null && _c !== void 0 ? _c : '') &&
+                ((_d = file.url) === null || _d === void 0 ? void 0 : _d.startsWith('/uploads/'));
+        });
+        OVERLAY_FILES.concat(videos);
+        if (videos.length === 0) {
+            strapi.log.warn('В папке overlay не найдены видеофайлы');
+            return null;
+        }
+    }
+    const selected = videos[Math.floor(Math.random() * videos.length)];
+    return path_1.default.resolve(process.cwd(), 'public', selected.url.replace(/^\/+/, ''));
 }
 function changeSpeed(input, output, speed) {
     return new Promise((resolve, reject) => {

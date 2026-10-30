@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.setLogging = setLogging;
 exports.addLog = addLog;
+exports.pingLogs = pingLogs;
 exports.clearErrors = clearErrors;
 exports.addError = addError;
 exports.addProgress = addProgress;
@@ -8,13 +10,20 @@ exports.setQueue = setQueue;
 exports.addQueue = addQueue;
 const UID = 'api::log.log';
 const MAX_LOGS = 50;
+let isLogging = false;
+function setLogging(state) {
+    isLogging = state;
+}
+// Текущий статус в памяти процесса Strapi.
+// addLog изменяет его, а pingLogs сохраняет в БД.
+let currentStatus = null;
 const getLogsDocument = async (strapi) => {
-    let doc = await strapi.documents('api::log.log').findFirst({
+    let doc = await strapi.documents(UID).findFirst({
         populate: {
             progress: {
-                populate: '*'
-            }
-        }
+                populate: '*',
+            },
+        },
     });
     if (doc)
         return doc;
@@ -30,6 +39,15 @@ const getLogsDocument = async (strapi) => {
     });
     return doc;
 };
+/**
+ * Извлекает статус из строки лога,
+ * удаляя дату и счетчик пингов.
+ */
+const extractStatus = (log) => {
+    return log
+        .replace(/^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s*/, '')
+        .replace(/\s+x\d+$/, '');
+};
 const getProgress = (progress) => {
     const value = (progress !== null && progress !== void 0 ? progress : {});
     const queue = Math.max(0, Number(value.queue) || 0);
@@ -37,23 +55,48 @@ const getProgress = (progress) => {
     return { processed, queue };
 };
 /**
- * Добавляет строку в лог.
- * Хранит максимум 50 последних записей.
+ * Обновляет текущий статус в памяти.
+ * В базу данных ничего не записывает.
  */
-async function addLog(strapi, log) {
+async function addLog(_strapi, log) {
+    currentStatus = log;
+}
+/**
+ * Сохраняет текущий статус в Single Type.
+ *
+ * Если статус совпадает с последней записью, увеличивает pings.
+ * Если отличается — создаёт новую запись.
+ */
+async function pingLogs(strapi) {
+    if (!isLogging)
+        return;
+    if (currentStatus === null)
+        return;
     const doc = await getLogsDocument(strapi);
-    const logs = Array.isArray(doc.logs) ? [...doc.logs] : [];
-    const entry = typeof log === 'string'
-        ? `[${new Date().toISOString()}] ${log}`
-        : {
-            timestamp: new Date().toISOString(),
-            ...log,
-        };
-    logs.push(entry);
+    const logs = Array.isArray(doc.logs)
+        ? [...doc.logs]
+        : [];
+    const status = typeof currentStatus === 'string'
+        ? currentStatus
+        : JSON.stringify(currentStatus);
+    const lastLog = logs.at(-1);
+    if (lastLog && extractStatus(lastLog) === status) {
+        const match = lastLog.match(/ x(\d+)$/);
+        const pings = match ? Number(match[1]) + 1 : 2;
+        logs[logs.length - 1] =
+            `${lastLog.replace(/\s+x\d+$/, '')} x${pings}`;
+    }
+    else {
+        const timestamp = new Date()
+            .toISOString()
+            .replace('T', ' ')
+            .slice(0, 19);
+        logs.push(`[${timestamp}] ${status}`);
+    }
     await strapi.documents(UID).update({
         documentId: doc.documentId,
         data: {
-            logs: logs.slice(-MAX_LOGS),
+            logs: JSON.parse(JSON.stringify(logs.slice(-MAX_LOGS))),
         },
     });
 }
@@ -100,6 +143,7 @@ async function addError(strapi, err) {
         };
     }
     errors.push(JSON.stringify(entry));
+    setLogging(false);
     await strapi.documents(UID).update({
         documentId: doc.documentId,
         data: {
@@ -127,7 +171,6 @@ async function addProgress(strapi) {
 }
 /**
  * Устанавливает количество запланированных видео.
- * Если queue меньше processed, processed уменьшается до queue.
  */
 async function setQueue(strapi, count) {
     const doc = await getLogsDocument(strapi);

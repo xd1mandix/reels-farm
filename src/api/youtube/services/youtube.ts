@@ -3,6 +3,7 @@ import fs from "fs";
 import type { Core } from "@strapi/strapi";
 import { createOAuthClient, refreshAccessToken } from "../controllers/youtube";
 import { getPublicPath } from '../../../services/ffmpeg';
+import { addError } from "../../../services/logging";
 
 export async function publishToYoutube(
   strapi: Core.Strapi,
@@ -23,24 +24,30 @@ export async function publishToYoutube(
 
   const filePath = getPublicPath(post.video.url)
 
-  const response = await youtube.videos.insert({
-    part: ["snippet", "status"],
-    requestBody: {
-      snippet: {
-        title: post.title,
-        description: post.description,
-        categoryId: "22",
+  let response = null
+  try {
+    response = await youtube.videos.insert({
+      part: ["snippet", "status"],
+      requestBody: {
+        snippet: {
+          title: post.title,
+          description: post.description,
+          categoryId: "22",
+        },
+        status: {
+          privacyStatus: "private",
+          publishAt: new Date(post.publishing).toISOString(),
+          selfDeclaredMadeForKids: false,
+        },
       },
-      status: {
-        privacyStatus: "private",
-        publishAt: new Date(post.publishing).toISOString(),
-        selfDeclaredMadeForKids: false,
+      media: {
+        body: fs.createReadStream(filePath),
       },
-    },
-    media: {
-      body: fs.createReadStream(filePath),
-    },
-  });
+    });
+  } catch (e) {
+    await addError(strapi, e)
+  }
+
 
   await strapi.documents("api::post.post").update({
     documentId: post.documentId,

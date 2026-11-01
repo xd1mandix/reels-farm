@@ -189,8 +189,6 @@ export async function addError(
 
     errors.push(JSON.stringify(entry));
 
-    setLogging(false)
-
     await strapi.documents(UID).update({
         documentId: doc.documentId,
         data: {

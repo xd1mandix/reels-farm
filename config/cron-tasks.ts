@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { pingLogs } from '../src/services/logging';
+import { addError, addLog, pingLogs } from '../src/services/logging';
 import { getPublicPath } from '../src/services/ffmpeg';
 import { publishToYoutube } from '../src/api/youtube/services/youtube';
 import { publishToInstagram } from '../src/api/instagram/services/instagram';
@@ -36,11 +36,11 @@ export default {
           // твоя логика публикации
           await publish(strapi, post);
 
-          console.log(post, '[published]');
+          await addLog(strapi, `${post.title} '[published]'`)
           await fs.unlink(getPublicPath(post.video.url), () => { })
         } catch (err) {
-          console.error(post, '[error]');
           console.error(err);
+          await addError(strapi, `${post.title} ${err} '[err]'`)
         }
       }
     },
@@ -55,7 +55,7 @@ export default {
       await pingLogs(strapi)
     },
     options: {
-      rule: "* * * * *", // каждую минуту
+      rule: "*/30 * * * * *", // каждую минуту
     },
   }
 };

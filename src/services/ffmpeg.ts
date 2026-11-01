@@ -64,13 +64,11 @@ export async function processVideo(documentId: string) {
   const speed = video.speed || 1;
 
   await addLog(strapi, `${workingVideo} '[read]'`)
-  console.log(workingVideo, '[read]')
   await addQueue(strapi, video.parts)
 
   // If Speed is != 1 - change speed in tmp file
   if (speed !== 1) {
     await addLog(strapi, `${workingVideo} '[speeding up]'`)
-    console.log(workingVideo, '[speeding up]')
 
     const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`)
 
@@ -78,7 +76,6 @@ export async function processVideo(documentId: string) {
 
     workingVideo = speedPath;
     await addLog(strapi, `${workingVideo} '[sped up]'`)
-    console.log(workingVideo, '[sped up]')
   }
 
   const fullDuration = await getDuration(workingVideo);
@@ -112,7 +109,6 @@ export async function processVideo(documentId: string) {
   );
 
   await addLog(strapi, `${JSON.stringify(publishDates)} '[planned]'`)
-  console.log(JSON.stringify(publishDates), '[planned]')
 
   // split video
   for (let i = 0; i < video.parts; i++) {
@@ -133,7 +129,6 @@ export async function processVideo(documentId: string) {
     });
 
     await addLog(strapi, `${i.toString()}, ${output} '[rendered]'`)
-    console.log(i.toString(), output, "[rendered]")
 
     try {
       const media = await uploadToStrapi(output, `${documentId}_${i}`);
@@ -153,16 +148,14 @@ export async function processVideo(documentId: string) {
       });
 
       await addLog(strapi, `${i} '[upladed]'`)
-      console.log(i.toString(), JSON.stringify(media), "[upladed]")
       await addProgress(strapi)
 
     } catch (e) {
-      await addError(strapi, e)
+      await addLog(strapi, `${e} '[error]'`)
     } finally {
       // Delete tmp file
       await fs.unlink(output, () => { })
       await addLog(strapi, `${i}, ${output} '[deleted]'`)
-      console.log(output, "[deleted]")
       await setLogging(false)
     }
   }

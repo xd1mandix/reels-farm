@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import { redis } from "./redis";
 import { processVideo } from "./ffmpeg";
 import { compileStrapi, Core, createStrapi } from "@strapi/strapi";
-import { addError } from "./logging";
+import { addError, setLogging } from "./logging";
 
 let worker = null
 let app = null
@@ -10,9 +10,6 @@ let app = null
 export const startVideoWorker = async (strapi) => {
   if (worker) return worker;
   app = strapi
-
-  console.log('start app', app)
-
   // await getStrapi()
 
   worker = new Worker(
@@ -28,15 +25,18 @@ export const startVideoWorker = async (strapi) => {
 
   worker.on("active", job => {
     console.log(`Job ${job.id} started`);
+    setLogging(true)
   });
 
   worker.on("completed", job => {
     console.log(`Job ${job.id} completed`);
+    setLogging(false)
   });
 
   worker.on("failed", async (job, err) => {
     console.error(err);
     await addError(strapi, err);
+    setLogging(false)
   });
 
   return worker

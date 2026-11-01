@@ -67,17 +67,14 @@ async function processVideo(documentId) {
     let workingVideo = videoPath;
     const speed = video.speed || 1;
     await (0, logging_1.addLog)(strapi, `${workingVideo} '[read]'`);
-    console.log(workingVideo, '[read]');
     await (0, logging_1.addQueue)(strapi, video.parts);
     // If Speed is != 1 - change speed in tmp file
     if (speed !== 1) {
         await (0, logging_1.addLog)(strapi, `${workingVideo} '[speeding up]'`);
-        console.log(workingVideo, '[speeding up]');
         const speedPath = getPublicPath(`temp/${documentId}_speed.mp4`);
         await changeSpeed(videoPath, speedPath, video.speed);
         workingVideo = speedPath;
         await (0, logging_1.addLog)(strapi, `${workingVideo} '[sped up]'`);
-        console.log(workingVideo, '[sped up]');
     }
     const fullDuration = await getDuration(workingVideo);
     // 3. timecodes (seconds)
@@ -99,7 +96,6 @@ async function processVideo(documentId) {
     // Plan every part through 4 hours after the last one
     const publishDates = await (0, schedule_1.getPublishingDates)(strapi, video.account.documentId, video.parts);
     await (0, logging_1.addLog)(strapi, `${JSON.stringify(publishDates)} '[planned]'`);
-    console.log(JSON.stringify(publishDates), '[planned]');
     // split video
     for (let i = 0; i < video.parts; i++) {
         await (0, logging_1.addLog)(strapi, `${i.toString()} '[processing]'`);
@@ -115,7 +111,6 @@ async function processVideo(documentId) {
             output,
         });
         await (0, logging_1.addLog)(strapi, `${i.toString()}, ${output} '[rendered]'`);
-        console.log(i.toString(), output, "[rendered]");
         try {
             const media = await uploadToStrapi(output, `${documentId}_${i}`);
             await strapi.documents("api::post.post").create({
@@ -132,17 +127,15 @@ async function processVideo(documentId) {
                 },
             });
             await (0, logging_1.addLog)(strapi, `${i} '[upladed]'`);
-            console.log(i.toString(), JSON.stringify(media), "[upladed]");
             await (0, logging_1.addProgress)(strapi);
         }
         catch (e) {
-            await (0, logging_1.addError)(strapi, e);
+            await (0, logging_1.addLog)(strapi, `${e} '[error]'`);
         }
         finally {
             // Delete tmp file
             await fs_1.default.unlink(output, () => { });
             await (0, logging_1.addLog)(strapi, `${i}, ${output} '[deleted]'`);
-            console.log(output, "[deleted]");
             await (0, logging_1.setLogging)(false);
         }
     }

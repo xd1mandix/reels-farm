@@ -36,12 +36,12 @@ exports.default = {
                 try {
                     // твоя логика публикации
                     await publish(strapi, post);
-                    console.log(post, '[published]');
+                    await (0, logging_1.addLog)(strapi, `${post.title} '[published]'`);
                     await fs_1.default.unlink((0, ffmpeg_1.getPublicPath)(post.video.url), () => { });
                 }
                 catch (err) {
-                    console.error(post, '[error]');
                     console.error(err);
+                    await (0, logging_1.addError)(strapi, `${post.title} ${err} '[err]'`);
                 }
             }
         },
@@ -55,7 +55,7 @@ exports.default = {
             await (0, logging_1.pingLogs)(strapi);
         },
         options: {
-            rule: "* * * * *", // каждую минуту
+            rule: "*/30 * * * * *", // каждую минуту
         },
     }
 };

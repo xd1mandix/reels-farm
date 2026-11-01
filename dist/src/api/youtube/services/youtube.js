@@ -8,6 +8,7 @@ const googleapis_1 = require("googleapis");
 const fs_1 = __importDefault(require("fs"));
 const youtube_1 = require("../controllers/youtube");
 const ffmpeg_1 = require("../../../services/ffmpeg");
+const logging_1 = require("../../../services/logging");
 async function publishToYoutube(strapi, post) {
     if (!post || !(post === null || post === void 0 ? void 0 : post.account))
         return { error: null };
@@ -19,24 +20,30 @@ async function publishToYoutube(strapi, post) {
         auth: oauth,
     });
     const filePath = (0, ffmpeg_1.getPublicPath)(post.video.url);
-    const response = await youtube.videos.insert({
-        part: ["snippet", "status"],
-        requestBody: {
-            snippet: {
-                title: post.title,
-                description: post.description,
-                categoryId: "22",
+    let response = null;
+    try {
+        response = await youtube.videos.insert({
+            part: ["snippet", "status"],
+            requestBody: {
+                snippet: {
+                    title: post.title,
+                    description: post.description,
+                    categoryId: "22",
+                },
+                status: {
+                    privacyStatus: "private",
+                    publishAt: new Date(post.publishing).toISOString(),
+                    selfDeclaredMadeForKids: false,
+                },
             },
-            status: {
-                privacyStatus: "private",
-                publishAt: new Date(post.publishing).toISOString(),
-                selfDeclaredMadeForKids: false,
+            media: {
+                body: fs_1.default.createReadStream(filePath),
             },
-        },
-        media: {
-            body: fs_1.default.createReadStream(filePath),
-        },
-    });
+        });
+    }
+    catch (e) {
+        await (0, logging_1.addError)(strapi, e);
+    }
     await strapi.documents("api::post.post").update({
         documentId: post.documentId,
         data: {

@@ -143,7 +143,6 @@ async function addError(strapi, err) {
         };
     }
     errors.push(JSON.stringify(entry));
-    setLogging(false);
     await strapi.documents(UID).update({
         documentId: doc.documentId,
         data: {

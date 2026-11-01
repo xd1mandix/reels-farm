@@ -13,7 +13,6 @@ const startVideoWorker = async (strapi) => {
     if (worker)
         return worker;
     app = strapi;
-    console.log('start app', app);
     // await getStrapi()
     worker = new bullmq_1.Worker("video-render", async (job) => {
         await (0, ffmpeg_1.processVideo)(job.data.documentId);
@@ -23,13 +22,16 @@ const startVideoWorker = async (strapi) => {
     });
     worker.on("active", job => {
         console.log(`Job ${job.id} started`);
+        (0, logging_1.setLogging)(true);
     });
     worker.on("completed", job => {
         console.log(`Job ${job.id} completed`);
+        (0, logging_1.setLogging)(false);
     });
     worker.on("failed", async (job, err) => {
         console.error(err);
         await (0, logging_1.addError)(strapi, err);
+        (0, logging_1.setLogging)(false);
     });
     return worker;
 };

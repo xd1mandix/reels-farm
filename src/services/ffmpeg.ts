@@ -297,6 +297,7 @@ export function renderPart(options) {
         "-b:v 28M",
         "-maxrate 30M",
         "-bufsize 56M",
+        "-af asetrate=48000*1.04,aresample=48000",
         "-b:a 192k",
         "-movflags +faststart",
       ])
@@ -340,8 +341,8 @@ const newComposition = (options) => {
   filters.push(
     "color=c=black:s=1080x1920:d=1[bg]",
     hasOverlay
-      ? "[0:v]hflip,scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
-      : "[0:v]hflip,scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]"
+      ? "[0:v]hflip,hue=h=5,scale=1080:1152:force_original_aspect_ratio=increase,crop=1080:1152[main]"
+      : "[0:v]hflip,hue=h=5,scale=1080:1536:force_original_aspect_ratio=increase,crop=1080:1536[main]"
   );
 
   if (hasOverlay) {

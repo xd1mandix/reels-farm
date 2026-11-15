@@ -240,7 +240,6 @@ function renderPart(options) {
             "-b:v 28M",
             "-maxrate 30M",
             "-bufsize 56M",
-            "-af asetrate=48000*1.04,aresample=48000",
             "-b:a 192k",
             "-movflags +faststart",
         ])

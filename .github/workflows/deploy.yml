@@ -1,0 +1,56 @@
+name: Deploy ReelsFarm
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+concurrency:
+  group: reelsfarm-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          ssh "$SSH_USER@$SSH_HOST" << 'EOF'
+            set -e
+
+            cd /var/www/reelsfarm
+
+            echo "Pulling latest code..."
+            git pull --ff-only origin main
+
+            docker compose down
+
+            docker builder prune -a -f
+
+            docker system prune -a -f
+
+            echo "Building Strapi..."
+            docker compose build
+
+            docker compose up -d
+
+            echo "Deployment completed."
+            docker compose ps
+          EOF

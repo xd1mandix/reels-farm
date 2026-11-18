@@ -241,7 +241,7 @@ function renderPart(options) {
             "-maxrate 30M",
             "-bufsize 56M",
             "-b:a 192k",
-            "-af rubberband=pitch=1.1",
+            "-af rubberband=pitch=1.03",
             "-movflags +faststart",
         ])
             .output(options.output)
